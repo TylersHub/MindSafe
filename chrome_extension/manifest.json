@@ -1,29 +1,32 @@
 {
   "manifest_version": 3,
   "name": "YouTube Kids Analyzer (Mock)",
-  "version": "1.0",
-  "description": "Mock version: Scores YouTube Kids videos without a backend.",
-  "permissions": ["activeTab", "storage", "scripting"],
+  "version": "1.0.0",
+  "description": "Tracks last clicked YouTube / YouTube Kids video and shows a mock 1–10 score.",
+  "permissions": ["storage"],
   "host_permissions": [
     "https://www.youtube.com/*",
+    "https://youtu.be/*",
+    "https://www.youtubekids.com/*",
     "https://kids.youtube.com/*"
   ],
   "background": {
     "service_worker": "background.js"
   },
+  "action": {
+    "default_title": "YouTube Kids Analyzer (Mock)",
+    "default_popup": "popup.html"
+  },
   "content_scripts": [
     {
       "matches": [
         "https://www.youtube.com/*",
+        "https://youtu.be/*",
+        "https://www.youtubekids.com/*",
         "https://kids.youtube.com/*"
       ],
       "js": ["content_script.js"],
       "run_at": "document_idle"
     }
-  ],
-  "action": {
-    "default_popup": "popup.html"
-  }
+  ]
 }
-
-

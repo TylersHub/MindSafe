@@ -1,15 +1,109 @@
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.type === "NEW_VIDEO") {
-    // --- MOCK RESPONSE ---
-    const data = {
-      videoId: msg.videoId,
-      score: Math.floor(Math.random() * 101), // random 0-100
+// background.js
+
+// In-memory fallback so popup can read the latest value even if storage fails
+let inMemoryLastScore = null;
+
+// Helper: turn 1–10 score into a label + reasons
+function labelForScore(score) {
+  if (score >= 8) {
+    return {
       label: "Highly suitable",
-      title: "Demo Video Title",
-      reasons: ["Mock reason 1", "Mock reason 2"]
+      reasons: ["Calm content", "Low risk themes", "Generally supportive tone"]
+    };
+  } else if (score >= 5) {
+    return {
+      label: "Moderately suitable",
+      reasons: ["Mostly okay", "Some mildly concerning elements", "Context matters for younger kids"]
+    };
+  } else {
+    return {
+      label: "Not recommended",
+      reasons: ["Potentially stressful or negative themes", "May not be appropriate for young children"]
+    };
+  }
+}
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  // 1) NEW_VIDEO: content script detected a video click
+  if (msg.type === "NEW_VIDEO") {
+    console.log("Background: NEW_VIDEO received", msg, "from", sender);
+
+    const score = Math.floor(Math.random() * 10) + 1; // 1–10
+    const { label, reasons } = labelForScore(score);
+
+    const data = {
+      videoId: msg.videoId || null,
+      videoUrl: msg.videoUrl || null,
+      title: msg.title || "Demo Video Title",
+      score,            // 1–10
+      label,            // "Highly suitable", etc.
+      reasons,          // array of strings
+      copied: !!msg.copied,
+      copiedAt: msg.copied ? Date.now() : null,
+      receivedAt: Date.now()
     };
 
-    // Store in chrome.storage.local
-    chrome.storage.local.set({ lastScore: data });
+    // Keep in-memory fallback
+    inMemoryLastScore = data;
+
+    // Try to persist in chrome.storage.local (not strictly required, but nice to have)
+    try {
+      chrome.storage.local.set({ lastScore: data }, () => {
+        if (chrome.runtime.lastError) {
+          console.error("Background: chrome.storage.local.set failed", chrome.runtime.lastError);
+          try {
+            chrome.runtime.sendMessage({
+              type: "STORAGE_ERROR",
+              error: chrome.runtime.lastError.message
+            });
+          } catch (sendErr) {
+            console.error("Background: failed to send STORAGE_ERROR message", sendErr);
+          }
+        } else {
+          console.log("Background: lastScore stored");
+        }
+      });
+    } catch (e) {
+      console.error("Background: exception when setting storage", e);
+      try {
+        chrome.runtime.sendMessage({
+          type: "STORAGE_ERROR",
+          error: e.message
+        });
+      } catch (sendErr) {
+        console.error("Background: failed to send STORAGE_ERROR message", sendErr);
+      }
+    }
+  }
+
+  // 2) GET_LAST_SCORE: popup is asking for whatever we last stored
+  if (msg.type === "GET_LAST_SCORE") {
+    if (inMemoryLastScore) {
+      sendResponse({ lastScore: inMemoryLastScore });
+    } else {
+      // Fallback to storage if we don't have anything in memory yet
+      try {
+        chrome.storage.local.get("lastScore", (data) => {
+          if (chrome.runtime.lastError) {
+            console.error("Background: chrome.storage.local.get failed", chrome.runtime.lastError);
+            sendResponse({
+              lastScore: null,
+              error: chrome.runtime.lastError.message
+            });
+          } else {
+            sendResponse({
+              lastScore: data.lastScore || null
+            });
+          }
+        });
+      } catch (e) {
+        console.error("Background: exception when getting storage", e);
+        sendResponse({
+          lastScore: null,
+          error: e.message
+        });
+      }
+    }
+    return true; // indicate async response
   }
 });
