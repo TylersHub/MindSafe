@@ -279,6 +279,10 @@ function requestAndRenderLatestPanel(intervalRef) {
   });
 }
 
+// Single shared polling reference so we can restart it when navigating to
+// a new video on the same YouTube tab.
+let mindsafeIntervalRef = { id: null };
+
 // ====================== INIT ======================
 
 if (isWatchPage(location.href)) {
@@ -313,9 +317,8 @@ if (isWatchPage(location.href)) {
   );
 
   // Poll for updates until we reach a terminal state (done/error)
-  const intervalRef = { id: null };
-  intervalRef.id = setInterval(() => {
-    requestAndRenderLatestPanel(intervalRef);
+  mindsafeIntervalRef.id = setInterval(() => {
+    requestAndRenderLatestPanel(mindsafeIntervalRef);
   }, 2000);
 
   // Listen for updates when the background finishes analysis
@@ -328,4 +331,60 @@ if (isWatchPage(location.href)) {
   console.log("[MindSafe] not a /watch page, doing nothing");
 }
 
+// ====================== SPA NAVIGATION WATCHER ======================
+// Watch for URL changes in this tab and restart analysis when a new watch page is loaded.
+let mindsafeCurrentVideoUrl = location.href;
+setInterval(() => {
+  const current = location.href;
+  if (current === mindsafeCurrentVideoUrl) return;
+  mindsafeCurrentVideoUrl = current;
 
+  if (!isWatchPage(current)) {
+    return;
+  }
+
+  console.log(
+    "[MindSafe] Detected navigation to new watch page, resetting panel"
+  );
+
+  const pendingData = {
+    videoUrl: current,
+    title: document.title,
+    status: "pending",
+    devScore: null,
+    brainrotIndex: null,
+    tenPointScore: null,
+    label: "Analysis pending",
+    reasons: ["The video is being analyzed by MindSafe."]
+  };
+
+  renderPanel(pendingData);
+
+  chrome.runtime.sendMessage(
+    {
+      type: "NEW_VIDEO",
+      videoUrl: current,
+      title: document.title
+    },
+    (resp) => {
+      if (chrome.runtime.lastError) {
+        console.warn(
+          "[MindSafe] NEW_VIDEO sendMessage error (nav):",
+          chrome.runtime.lastError
+        );
+      } else if (resp && resp.lastScore) {
+        renderPanel(resp.lastScore);
+      }
+    }
+  );
+
+  // Restart polling so GET_LAST_SCORE keeps updating until the new
+  // evaluation reaches a terminal state.
+  if (mindsafeIntervalRef.id) {
+    clearInterval(mindsafeIntervalRef.id);
+    mindsafeIntervalRef.id = null;
+  }
+  mindsafeIntervalRef.id = setInterval(() => {
+    requestAndRenderLatestPanel(mindsafeIntervalRef);
+  }, 2000);
+}, 1000);
