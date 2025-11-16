@@ -17,7 +17,7 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Helvetica Neue", Arial, sans-serif;
   color: #0f172a;
-  background: radial-gradient(circle at top left, #f2f7ff 0, #ffffff 45%, #edf1ff 100%);
+  background: radial-gradient(circle at top left, #f2f7ff 0, #f2f7ff 0, #f2f7ff 0);
 }
 
 /* ====== UTILS ====== */
@@ -28,8 +28,7 @@ body {
   padding: 0 1.5rem;
 }
 
-/* ====== NAVBAR ====== */
-
+/* Navbar */
 .nav {
   position: sticky;
   top: 0;
@@ -104,7 +103,7 @@ body {
   gap: 0.75rem;
 }
 
-/* ====== BUTTONS ====== */
+/* Buttons */
 
 .btn {
   display: inline-flex;
@@ -152,7 +151,7 @@ body {
   background: rgba(148, 163, 184, 0.12);
 }
 
-/* ====== HERO ====== */
+/* Hero Section */
 
 .hero {
   padding: 4rem 0 4.5rem;
@@ -234,7 +233,7 @@ body {
   white-space: nowrap;
 }
 
-/* ====== HERO MEDIA ====== */
+/* Hero Media */
 
 .hero__media {
   display: flex;
@@ -252,7 +251,6 @@ body {
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.45);
 }
 
-/* Image fills the card cleanly */
 .hero__brain {
   position: absolute;
   inset: 0;
@@ -267,7 +265,7 @@ body {
   display: block;
 }
 
-/* ====== TRUSTED BY STRIP ====== */
+/* Trusted By  */
 
 .trust {
   padding: 2.5rem 0 2.75rem;
@@ -313,10 +311,11 @@ body {
   }
 }
 
-/* ====== DEMO SECTION (SEE IT IN ACTION) ====== */
+/* Demo Section */
 
 .demo {
   padding: 3.5rem 0 4.5rem;
+  background: radial-gradient(circle at top left, #f2f7ff 0, #f2f7ff 0, #f2f7ff 0);
 }
 
 .demo__inner {
@@ -343,7 +342,6 @@ body {
   line-height: 1.6;
 }
 
-/* Demo card that looks like a video screen */
 .demo-card {
   max-width: 960px;
   margin: 0 auto;
@@ -364,7 +362,6 @@ body {
   justify-content: center;
 }
 
-/* Play button overlay */
 .demo-card__play {
   position: relative;
   border: none;
@@ -413,7 +410,6 @@ body {
   font-size: 0.8rem;
 }
 
-/* Optional video element (when you want a real video) */
 .demo-card__video {
   position: absolute;
   inset: 0;
@@ -422,7 +418,6 @@ body {
   object-fit: cover;
 }
 
-/* On small screens, keep spacing tight */
 @media (max-width: 640px) {
   .demo {
     padding: 3rem 0 3.5rem;
@@ -434,7 +429,7 @@ body {
   }
 }
 
-/* ====== CTA FOOTER (MAKA-STYLE) ====== */
+/* Footer */
 
 .cta-footer {
   background: #0b1020;
@@ -449,7 +444,6 @@ body {
   overflow: hidden;
 }
 
-/* Optional left decorative slope */
 .cta-footer__gradient::before {
   content: "";
   position: absolute;
@@ -463,7 +457,6 @@ body {
   transform: skewX(-18deg);
 }
 
-/* Inner layout */
 .cta-footer__inner {
   position: relative;
   display: flex;
@@ -472,7 +465,6 @@ body {
   min-height: 260px;
 }
 
-/* Text content */
 .cta-footer__content {
   text-align: center;
   max-width: 540px;
@@ -515,7 +507,6 @@ body {
   margin: 0 auto;
 }
 
-/* Email input */
 .cta-footer__input {
   width: 100%;
   padding: 0.8rem 1rem;
@@ -536,7 +527,6 @@ body {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
-/* White pill button specific to footer */
 .btn.btn--footer-primary {
   background: #ffffff;
   color: #111827;
@@ -551,7 +541,7 @@ body {
   box-shadow: 0 18px 32px rgba(15, 23, 42, 0.55);
 }
 
-/* Mascot on the right */
+/* Mascot */
 .cta-footer__mascot {
   position: absolute;
   right: -4%;
@@ -563,7 +553,7 @@ body {
   border-radius: 100%;
 }
 
-/* ====== BOTTOM WHITE FOOTER BAR ====== */
+/* Bottom White Footer Bar */
 
 .site-footer {
   background: #ffffff;
@@ -597,7 +587,6 @@ body {
   text-decoration: underline;
 }
 
-/* Brand */
 .site-footer__brand {
   display: flex;
   align-items: center;
@@ -633,7 +622,7 @@ body {
   font-size: 0.95rem;
 }
 
-/* ====== RESPONSIVE ====== */
+/* Responsive Stack */
 
 @media (max-width: 900px) {
   .nav__links {

@@ -5,40 +5,35 @@
     <meta charset="utf-8" />
     <title>MindSafe</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="/static/css/styles.css" />
+    <link rel="stylesheet" href="../static/css/styles.css" />
 </head>
 
 <body>
-    <!-- ====== NAVBAR ====== -->
+    <!-- Navbar -->
     <header class="nav">
         <div class="nav__inner container">
             <div class="nav__brand">
                 <div class="nav__logo-icon">
                     <a href="/">
-                        <img
-                            class="nav__logo-image"
-                            src="/static/img/mind.png"
-                            alt="MindSafe logo"
-                        />
+                        <img class="nav__logo-image" src="../static/img/mind.png" alt="MindSafe logo" />
                     </a>
                 </div>
                 <span class="nav__logo-text">MindSafe</span>
             </div>
 
             <nav class="nav__links">
-                <a href="#features">Features</a>
-                <a href="#demo">How It Works</a>
+                <a href="#shows">Clips</a>
+                <a href="#metrics">Metrics</a>
+                <a href="#extension">Extension</a>
             </nav>
 
             <div class="nav__cta">
-                <!-- <a href="#demo" class="btn btn--ghost">Log In</a> -->
-                <!-- Let Flask handle /form route -->
-                <a href="/templates/form.html" class="btn btn--primary">Try MindSafe</a>
+                <a href="{{ url_for('form') }}" class="btn btn--primary">Try MindSafe</a>
             </div>
         </div>
     </header>
 
-    <!-- ====== HERO ====== -->
+    <!-- Hero Section -->
     <main>
         <section class="hero">
             <div class="hero__inner container">
@@ -49,11 +44,12 @@
                         We know quality kids' media
                     </h1>
                     <p class="hero__subtitle">
-MindSafe's experts, Oxford and Yale-trained in childhood development, are here to help you make confident and informed choices about screen time.
+                        MindSafe's experts, Oxford and Yale-trained in childhood development, are here to help you make
+                        confident and informed choices about screen time.
                     </p>
 
                     <div class="hero__actions">
-                        <a href="#demo" class="btn btn--primary">Start Free Trial</a>
+                        <a href="{{ url_for('index') }}" class="btn btn--primary">Start Free Trial</a>
                         <a href="#demo" class="btn btn--secondary">View Demo</a>
                     </div>
 
@@ -69,16 +65,11 @@ MindSafe's experts, Oxford and Yale-trained in childhood development, are here t
                     </div>
                 </div>
 
-                <!-- Right column -->
                 <div class="hero__media">
                     <div class="hero__media-inner">
-                        <!-- Brain / video placeholder -->
                         <div class="hero__brain">
-                            <img
-                                class="hero__brain-image"
-                                src="/static/img/young-boy-watching-tablet.jpg"
-                                alt="3D Brain Simulation"
-                            />
+                            <img class="hero__brain-image" src="../static/img/young-boy-watching-tablet.jpg"
+                                alt="3D Brain Simulation" />
                         </div>
                     </div>
                 </div>
@@ -87,63 +78,59 @@ MindSafe's experts, Oxford and Yale-trained in childhood development, are here t
     </main>
 
 
-        <!-- ====== TRUSTED BY SECTION ====== -->
+    <!-- Trusted By Section -->
     <section class="trust">
-      <div class="container trust__inner">
-        <p class="trust__label">
-          TRUSTED BY LEADING HOSPITALS AND RESEARCH INSTITUTIONS
-        </p>
-        <div class="trust__logos">
-          <span>Johns Hopkins</span>
-          <span>Mayo Clinic</span>
-          <span>Stanford Health</span>
-          <span>Mass General</span>
-          <span>Cleveland Clinic</span>
+        <div class="container trust__inner">
+            <p class="trust__label">
+                TRUSTED BY LEADING HOSPITALS AND RESEARCH INSTITUTIONS
+            </p>
+            <div class="trust__logos">
+                <span>Johns Hopkins</span>
+                <span>Mayo Clinic</span>
+                <span>Stanford Health</span>
+                <span>Mass General</span>
+                <span>Cleveland Clinic</span>
+            </div>
         </div>
-      </div>
     </section>
 
-        <!-- ====== DEMO SECTION (“See it in action”) ====== -->
+    <!-- Demo Section -->
     <section class="demo" id="demo">
-      <div class="container demo__inner">
-        <div class="demo__header">
-          <h2 class="demo__title">See it in action</h2>
-          <p class="demo__subtitle">
-            Watch how MindSafe transforms surgical planning with real-time 3D simulation
-            and AI analysis.
-          </p>
+        <div class="container demo__inner">
+            <div class="demo__header">
+                <h2 class="demo__title">See it in action</h2>
+                <p class="demo__subtitle">
+                    Watch how MindSafe transforms surgical planning with real-time 3D simulation
+                    and AI analysis.
+                </p>
+            </div>
+
+            <div class="demo-card">
+                <div class="demo-card__inner">
+                    <video class="demo-card__video" src="../static/img/rick.mp4" controls></video>
+
+                </div>
+            </div>
         </div>
-
-        <div class="demo-card">
-          <div class="demo-card__inner">
-            <!-- Play button / overlay -->
-            <!-- <button class="demo-card__play" type="button">
-              <span class="demo-card__play-ring"></span>
-              <span class="demo-card__play-circle">
-                <span class="demo-card__play-icon">▶</span>
-              </span>
-            </button> -->
-
-            <!-- <div class="demo-card__meta">
-              <div class="demo-card__label">Watch Demo</div>
-              <div class="demo-card__duration">3 minutes</div>
-            </div> -->
-
-            <!-- Optional REAL video (replace src and remove the comment when ready) -->
-            
-            <video
-              class="demo-card__video"
-              src="../static/img/rick.mp4"
-              controls
-            ></video>
-           
-          </div>
-        </div>
-      </div>
     </section>
-  </main>
+    </main>
 
-    <!-- ====== CTA FOOTER SECTION ====== -->
+    <!-- Metrics section -->
+    <div id="metrics">
+        {% include 'metrics.html' %}
+    </div>
+
+    <!-- Shows section -->
+    <div id="shows">
+        {% include 'shows.html' %}
+    </div>
+
+    <!-- Extension section -->
+    <div id="extension">
+        {% include 'extension.html' %}
+    </div>
+
+    <!-- Footer Section -->
     <section class="cta-footer">
         <div class="cta-footer__gradient">
             <div class="container cta-footer__inner">
@@ -163,24 +150,15 @@ MindSafe's experts, Oxford and Yale-trained in childhood development, are here t
                     </p>
 
                     <form class="cta-footer__form">
-                        <input
-                            type="email"
-                            class="cta-footer__input"
-                            placeholder="name@email.com"
-                            required
-                        />
+                        <input type="email" class="cta-footer__input" placeholder="name@email.com" required />
                         <button type="submit" class="btn btn--footer-primary">
                             Join the Waitlist
                         </button>
                     </form>
                 </div>
 
-                <!-- Cute animal on the right -->
-                <img
-                    src="/static/img/koala.png"
-                    alt="Friendly mascot"
-                    class="cta-footer__mascot"
-                />
+                <!-- animal on the right -->
+                <img src="../static/img/koala.png" alt="Friendly mascot" class="cta-footer__mascot" />
             </div>
         </div>
 
@@ -195,23 +173,20 @@ MindSafe's experts, Oxford and Yale-trained in childhood development, are here t
                     <a href="#">Contact us</a>
                 </div>
 
-            <div class="nav__brand">
-                <div class="nav__logo-icon">
-                    <a href="/">
-                        <img
-                            class="nav__logo-image"
-                            src="/static/img/mind.png"
-                            alt="MindSafe logo"
-                        />
-                    </a>
+                <div class="nav__brand">
+                    <div class="nav__logo-icon">
+                        <a href="/">
+                            <img class="nav__logo-image" src="../static/img/mind.png" alt="MindSafe logo" />
+                        </a>
+                    </div>
+                    <span class="nav__logo-text">MindSafe</span>
                 </div>
-                <span class="nav__logo-text">MindSafe</span>
-            </div>
             </div>
         </footer>
     </section>
 
-    <script src="/static/js/app.js"></script>
+    <!-- Scripts -->
+    <script src="../static/js/app.js"></script>
 </body>
 
 </html>
