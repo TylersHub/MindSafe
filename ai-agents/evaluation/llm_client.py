@@ -11,7 +11,7 @@ Usage:
 Env vars:
     OPENROUTER_API_KEY   (required)
     OPENROUTER_BASE_URL  (optional, default: https://openrouter.ai/api/v1)
-    OPENROUTER_MODEL     (optional, default: google/gemini-2.0-flash-lite)
+    OPENROUTER_MODEL     (optional, default: google/gemini-2.5-flash)
 """
 
 import json
@@ -60,7 +60,7 @@ class LLMClient:
         self.model = (
             model
             or os.getenv("OPENROUTER_MODEL")
-            or "google/gemini-2.0-flash-lite"
+            or "google/gemini-2.5-flash"
         )
         self.temperature = temperature
 

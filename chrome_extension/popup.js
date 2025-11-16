@@ -4,13 +4,16 @@
 
 function renderResult(r) {
   const resultDiv = document.getElementById("result");
+  const statusPill = document.getElementById("status-pill");
   if (!r) {
+    if (statusPill) statusPill.textContent = "Idle";
     resultDiv.innerText =
       "No video analyzed yet. Open a YouTube / YouTube Kids video, wait for MindSafe to finish, then reopen this popup.";
     return;
   }
 
   if (r.status === "pending") {
+    if (statusPill) statusPill.textContent = "Analyzing…";
     resultDiv.innerHTML = `
       <div><b>Status:</b> Analysis in progress…</div>
       <div><b>Title:</b> ${r.title || "Video"}</div>
@@ -20,6 +23,7 @@ function renderResult(r) {
   }
 
   if (r.status === "error") {
+    if (statusPill) statusPill.textContent = "Error";
     resultDiv.innerHTML = `
       <div style="color:red"><b>Status:</b> Analysis failed</div>
       <div><b>Title:</b> ${r.title || "Video"}</div>
@@ -45,47 +49,43 @@ function renderResult(r) {
 
   let dimHtml = "";
   if (dim) {
-    const prettyNames = {
-      pacing: "Pacing",
-      story: "Story",
-      language: "Language",
-      sel: "Social-Emotional Learning",
-      fantasy: "Fantasy",
-      interactivity: "Interactivity",
+    // Map backend JSON keys to human labels
+    const dimMap = {
+      Pacing: "Pacing",
+      Story: "Story",
+      Language: "Language",
+      SEL: "Social-Emotional Learning",
+      Fantasy: "Fantasy",
+      Interactivity: "Interactivity",
     };
     dimHtml =
       "<ul>" +
-      Object.keys(prettyNames)
-        .map((key) => {
-          const rawKey = key;
-          const apiKey = prettyNames[key]; // e.g., "Pacing"
-          const v =
-            typeof dim[rawKey] === "number"
-              ? dim[rawKey]
-              : typeof dim[apiKey] === "number"
-              ? dim[apiKey]
-              : null;
+      Object.entries(dimMap)
+        .map(([apiKey, labelText]) => {
+          const v = dim[apiKey];
           const score = typeof v === "number" ? `${v.toFixed(1)}/100` : "N/A";
-          return `<li><b>${prettyNames[key]}:</b> ${score}</li>`;
+          return `<li><b>${labelText}:</b> ${score}</li>`;
         })
         .join("") +
       "</ul>";
   }
 
   resultDiv.innerHTML = `
-    <div><b>Overall rating:</b> <span class="score">${tenPoint}</span></div>
-    <div><b>Label:</b> ${r.label || "N/A"}</div>
-    <div><b>Developmental score:</b> ${devScore}</div>
-    <div><b>Brainrot index:</b> ${brainrot}</div>
-    <div><b>Title:</b> ${r.title || "Video"}</div>
-    <div><b>Link:</b> <a href="${r.videoUrl}" target="_blank">${r.videoUrl}</a></div>
-    <div><b>Reasons:</b> ${reasonsText}</div>
-    ${
-      dimHtml
-        ? `<div><b>Dimension scores:</b>${dimHtml}</div>`
-        : ""
-    }
+    <div style="margin-bottom:6px;">
+      <div style="font-size:12px; color:#6b7280;">Overall rating</div>
+      <div class="score">${tenPoint}</div>
+      <div style="font-size:12px; color:#374151; margin-top:2px;">${r.label || "N/A"}</div>
+    </div>
+    <hr style="border:none; border-top:1px solid #e5e7eb; margin:6px 0;" />
+    <div style="margin-bottom:4px;"><b>Developmental score:</b> ${devScore}</div>
+    <div style="margin-bottom:6px;"><b>Brainrot index:</b> ${brainrot}</div>
+    <div style="margin-bottom:4px;"><b>Title:</b> ${r.title || "Video"}</div>
+    <div style="margin-bottom:6px;"><b>Link:</b> <a href="${r.videoUrl}" target="_blank">${r.videoUrl}</a></div>
+    <div style="margin-bottom:4px;"><b>Reasons:</b> ${reasonsText}</div>
+    ${dimHtml ? `<div><b>Dimension scores:</b>${dimHtml}</div>` : ""}
   `;
+
+  if (statusPill) statusPill.textContent = "Complete";
 }
 
 // Ask background for lastScore (with fallback to storage)

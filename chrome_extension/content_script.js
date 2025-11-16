@@ -54,17 +54,18 @@ function renderPanel(data) {
     panel = document.createElement("div");
     panel.id = "mindsafe-stats-panel";
 
-    panel.style.marginBottom = "8px";
+    panel.style.marginBottom = "10px";
     panel.style.padding = "10px 12px";
-    panel.style.borderRadius = "10px";
+    panel.style.borderRadius = "14px";
     panel.style.boxSizing = "border-box";
     panel.style.fontFamily = "Roboto, Arial, sans-serif";
     panel.style.fontSize = "12px";
 
-    panel.style.background = "rgba(255,255,255,0.96)";
+    panel.style.background =
+      "linear-gradient(135deg, rgba(239,246,255,0.96), rgba(255,255,255,0.96))";
     panel.style.color = "#111";
-    panel.style.boxShadow = "0 1px 3px rgba(0,0,0,0.25)";
-    panel.style.border = "1px solid rgba(0,0,0,0.08)";
+    panel.style.boxShadow = "0 8px 20px rgba(15,23,42,0.18)";
+    panel.style.border = "1px solid rgba(148,163,184,0.4)";
   }
 
   const status = data && data.status;
@@ -166,30 +167,23 @@ function renderPanel(data) {
 
           let dimHtml = "";
           if (dim) {
-            const prettyNames = {
-              pacing: "Pacing",
-              story: "Story",
-              language: "Language",
-              sel: "Social-Emotional Learning",
-              fantasy: "Fantasy",
-              interactivity: "Interactivity",
+            // Map API keys to human labels; matches backend JSON keys
+            const dimMap = {
+              Pacing: "Pacing",
+              Story: "Story",
+              Language: "Language",
+              SEL: "Social-Emotional Learning",
+              Fantasy: "Fantasy",
+              Interactivity: "Interactivity",
             };
             dimHtml =
               "<ul style='padding-left:16px; margin:4px 0;'> " +
-              Object.keys(prettyNames)
-                .map((key) => {
-                  // Support both lowercase keys and capitalized keys
-                  const rawKey = key;
-                  const apiKey = prettyNames[key]; // e.g., "Pacing"
-                  const v =
-                    typeof dim[rawKey] === "number"
-                      ? dim[rawKey]
-                      : typeof dim[apiKey] === "number"
-                      ? dim[apiKey]
-                      : null;
+              Object.entries(dimMap)
+                .map(([apiKey, labelText]) => {
+                  const v = dim[apiKey];
                   const score =
                     typeof v === "number" ? `${v.toFixed(1)}/100` : "N/A";
-                  return `<li><b>${prettyNames[key]}:</b> ${score}</li>`;
+                  return `<li><b>${labelText}:</b> ${score}</li>`;
                 })
                 .join("") +
               "</ul>";

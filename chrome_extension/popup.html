@@ -2,20 +2,66 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>YouTube Kids Analyzer (Mock)</title>
+    <title>MindSafe – Video Score</title>
     <style>
       body {
-        width: 320px;
-        padding: 10px;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        width: 340px;
+        margin: 0;
+        padding: 14px;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
         font-size: 13px;
+        background: radial-gradient(
+          circle at top left,
+          #eff6ff 0,
+          #ffffff 45%,
+          #eef2ff 100%
+        );
+        color: #0f172a;
       }
-      h3 {
-        margin: 0 0 8px;
-        font-size: 16px;
+      .card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 12px 14px;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+        border: 1px solid rgba(148, 163, 184, 0.25);
+      }
+      .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+      .card-title {
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .card-title-icon {
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #f9fafb;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .status-pill {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid rgba(37, 99, 235, 0.25);
+        white-space: nowrap;
       }
       #result {
-        margin-top: 8px;
+        margin-top: 4px;
       }
       a {
         color: #2563eb;
@@ -25,15 +71,22 @@
         text-decoration: underline;
       }
       .score {
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 700;
-        margin-top: 4px;
       }
     </style>
   </head>
   <body>
-    <h3>YouTube Kids Analyzer (Mock)</h3>
-    <div id="result">Loading...</div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-title-icon">MS</span>
+          <span>MindSafe Video Score</span>
+        </div>
+        <span class="status-pill" id="status-pill">Loading…</span>
+      </div>
+      <div id="result">Loading…</div>
+    </div>
     <script src="popup.js"></script>
   </body>
 </html>
