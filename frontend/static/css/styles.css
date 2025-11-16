@@ -17,7 +17,7 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Helvetica Neue", Arial, sans-serif;
   color: #0f172a;
-  background: radial-gradient(circle at top left, #f2f7ff 0, #ffffff 45%, #edf1ff 100%);
+  background: radial-gradient(circle at top left, #f2f7ff 0, #f2f7ff 0, #f2f7ff 0);
 }
 
 /* ====== UTILS ====== */
@@ -317,6 +317,7 @@ body {
 
 .demo {
   padding: 3.5rem 0 4.5rem;
+  background: radial-gradient(circle at top left, #f2f7ff 0, #f2f7ff 0, #f2f7ff 0);
 }
 
 .demo__inner {
