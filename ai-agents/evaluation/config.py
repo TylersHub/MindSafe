@@ -293,7 +293,7 @@ TIER1_VOCAB = {
 # LLM Configuration (used via OpenRouter / Gemini)
 LLM_CONFIG = {
     # Default Gemini model served through OpenRouter; can be overridden with OPENROUTER_MODEL.
-    "model": "google/gemini-2.0-flash-exp",
+    "model": "google/gemini-2.0-flash-lite",
     "temperature": 0.1,  # Low temperature for consistent labeling
     "max_tokens": 2000,
     "segment_duration": 30,  # seconds per segment for LLM analysis

@@ -145,32 +145,42 @@ def evaluate_video(video_path: str,
     print(f"  Mean utterance length: {text_basic.get('mean_utterance_length', 0):.1f} words")
     print(f"  Question rate: {text_basic.get('question_rate', 0):.1f} per minute")
     
-    # Step 4: Semantic metrics (FAST MODE - skip LLM)
-    print("\nStep 4: Computing semantic metrics (fast mode, no LLM)...")
-    # Use neutral, fast defaults instead of expensive LLM analysis
-    semantic_metrics = {
-        "prosocial_rate": 0.0,
-        "aggression_rate": 0.0,
-        "prosocial_ratio": 0.5,
-        "sel_strategy_rate": 0.0,
-        "direct_address_rate": 0.0,
-        "interactive_block_count": 0,
-        "fantasy_rate": 0.0,
-        "impossible_event_rate": 0.0,
-        "fear_intense_rate": 0.0,
-    }
+    # Step 4: Semantic metrics
+    print("\nStep 4: Computing semantic metrics...")
+    # If an LLM client is available, use it; otherwise fall back to fast heuristics
+    if llm_client is not None:
+        print("  Using LLM-based semantic labeling...")
+        segment_labels = llm_label_segments(
+            transcript_segments,
+            llm_client,
+            chunk_duration=LLM_CONFIG["segment_duration"],
+        )
+        print(f"  Labeled {len(segment_labels)} segments")
+        semantic_metrics = compute_event_metrics_from_labels(
+            segment_labels, duration_min
+        )
+    else:
+        print("  Using heuristic semantic metrics (no LLM)...")
+        semantic_metrics = compute_event_metrics_heuristic(
+            transcript_segments, duration_min
+        )
     print(f"  Prosocial rate: {semantic_metrics['prosocial_rate']:.1f} per minute")
     print(f"  Aggression rate: {semantic_metrics['aggression_rate']:.1f} per minute")
     print(f"  Prosocial ratio: {semantic_metrics['prosocial_ratio']:.2f}")
     
-    # Step 5: Narrative coherence (FAST MODE - no embeddings/LLM)
-    print("\nStep 5: Computing narrative coherence (fast defaults)...")
-    narrative_metrics = {
-        "adjacent_similarity_mean": 0.7,
-        "topic_jumps": 0.2,
-    }
-    print(f"  Adjacent similarity: {narrative_metrics['adjacent_similarity_mean']:.2f}")
-    print(f"  Topic jumps: {narrative_metrics['topic_jumps']:.2f}")
+    # Step 5: Narrative coherence
+    print("\nStep 5: Computing narrative coherence...")
+    # Prefer fast, local embedding-based coherence; fall back to defaults on error
+    narrative_metrics = compute_narrative_metrics(
+        transcript_segments,
+        llm_client=llm_client if llm_client is not None else None,
+        use_embeddings=True,
+        chunk_duration=LLM_CONFIG["segment_duration"],
+    )
+    print(
+        f"  Adjacent similarity: {narrative_metrics.get('adjacent_similarity_mean', 0):.2f}"
+    )
+    print(f"  Topic jumps: {narrative_metrics.get('topic_jumps', 0):.2f}")
     
     # Step 6: Merge all raw metrics
     print("\nStep 6: Merging metrics...")

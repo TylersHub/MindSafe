@@ -15,7 +15,7 @@ load_dotenv()
 
 # OpenRouter / Gemini configuration (used indirectly by evaluation.llm_client)
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-VISION_MODEL = os.getenv("OPENROUTER_VISION_MODEL", "google/gemini-2.0-flash-exp")
+VISION_MODEL = os.getenv("OPENROUTER_VISION_MODEL", "google/gemini-2.0-flash-lite")
 
 
 # Processing Configuration

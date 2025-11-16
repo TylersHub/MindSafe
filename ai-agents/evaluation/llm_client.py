@@ -11,7 +11,7 @@ Usage:
 Env vars:
     OPENROUTER_API_KEY   (required)
     OPENROUTER_BASE_URL  (optional, default: https://openrouter.ai/api/v1)
-    OPENROUTER_MODEL     (optional, default: google/gemini-2.0-flash-exp)
+    OPENROUTER_MODEL     (optional, default: google/gemini-2.0-flash-lite)
 """
 
 import json
@@ -60,7 +60,7 @@ class LLMClient:
         self.model = (
             model
             or os.getenv("OPENROUTER_MODEL")
-            or "google/gemini-2.0-flash-exp"
+            or "google/gemini-2.0-flash-lite"
         )
         self.temperature = temperature
 
@@ -80,21 +80,34 @@ class LLMClient:
         """
         Low-level helper to call OpenRouter's chat completions endpoint.
 
-        Returns {} on error so callers can fail gracefully.
+        On success: returns parsed JSON.
+        On HTTP error: logs and tries to return server JSON (containing "error" if present).
+        On other errors: logs and returns {}.
         """
         try:
             resp = self._http.post("/chat/completions", json=payload)
-            # Debug: uncomment if you want to see the exact URL:
-            # print("[LLMClient] Request URL:", resp.request.url)
-            resp.raise_for_status()
-            return resp.json()
-        except httpx.HTTPStatusError as e:
-            print(f"[LLMClient] HTTP error from OpenRouter chat API: {e}")
+
+            # Try to parse JSON first so we can inspect any error payload
             try:
-                print("[LLMClient] Response body:", e.response.text[:1000])
+                data = resp.json()
             except Exception:
-                pass
-            return {}
+                data = {}
+
+            try:
+                resp.raise_for_status()
+            except httpx.HTTPStatusError as e:
+                print(f"[LLMClient] HTTP error from OpenRouter chat API: {e}")
+                try:
+                    print("[LLMClient] Response body:", e.response.text[:1000])
+                except Exception:
+                    pass
+                # Prefer returning whatever JSON the server sent (likely contains "error")
+                try:
+                    return e.response.json()
+                except Exception:
+                    return data or {}
+
+            return data
         except httpx.HTTPError as e:
             print(f"[LLMClient] Network error calling OpenRouter chat API: {e}")
             return {}
@@ -123,6 +136,16 @@ class LLMClient:
         payload.update(kwargs)
 
         data = self._post_chat(payload)
+
+        if not data:
+            print("[LLMClient] Empty response from OpenRouter.")
+            return "[LLM ERROR] Empty response from upstream."
+
+        # Handle explicit error objects from OpenRouter
+        if "error" in data:
+            print(f"[LLMClient] OpenRouter error: {data['error']}")
+            return "[LLM ERROR] Upstream model error."
+
         try:
             return data["choices"][0]["message"]["content"]
         except (KeyError, IndexError, TypeError) as e:
@@ -164,6 +187,14 @@ class LLMClient:
 
         data = self._post_chat(payload)
 
+        if not data:
+            print("[LLMClient] Empty response from OpenRouter in json_chat.")
+            return {}
+
+        if "error" in data:
+            print(f"[LLMClient] OpenRouter error in json_chat: {data['error']}")
+            return {}
+
         try:
             content = data["choices"][0]["message"]["content"]
             return json.loads(content)
@@ -172,7 +203,7 @@ class LLMClient:
             print(f"[LLMClient] Raw response: {json.dumps(data, indent=2)[:2000]}")
             return {}
 
-    # ---------- Your Specialized Helpers ----------
+    # ---------- Specialized Helpers ----------
 
     def classify_segment_events(
         self, text_segment: str, segment_duration: float = 30.0
