@@ -9,22 +9,16 @@
     <!-- Load Tailwind CSS (External Dependency) -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Link to your new CSS file -->
-    <link rel="stylesheet" href="/static/css/form.css">
+    <!-- Link to Form CSS file -->
+    <link rel="stylesheet" href="../static/css/form.css">
 </head>
 
 <body class="bg-blue-50 font-sans text-gray-800">
 
-    <!-- 
-      Main container that holds everything.
-      'relative' allows us to position the SVGs inside.
-      'overflow-hidden' clips the SVGs if they go too far off-screen.
-    -->
-    <div class="relative flex items-center justify-center min-h-screen py-12 px-4 overflow-hidden">
+    <div class="relative flex items-center justify-center min-h-screen py-12 px-4 overflow-hidden ">
 
         <!-- --- Back Button --- -->
-        <!-- This assumes your main page is index.html. Change the href if it's different. -->
-        <a href="/templates/index.html"
+        <a href="{{ url_for('index') }}"
             class="absolute top-6 left-6 z-30 inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full shadow-md text-sm font-medium text-gray-700 hover:bg-white transition-all">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                 <path fill-rule="evenodd"
@@ -81,26 +75,22 @@
             </svg>
         </div>
 
-
-        <!-- 
-          The Form Card.
-          'relative' and 'z-20' ensure it sits ON TOP of the SVGs.
-        -->
+        <!-- --- Form Container --- -->
         <div
             class="relative z-20 w-full max-w-xl min-h-[500px] p-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100">
 
             <h1 class="text-4xl font-bold text-center text-gray-900 mb-2">MindSafe: Check it out!</h1>
-            <br/>
+            <br />
 
-            <form id="summarize-form" novalidate>
+            <form id="summarize-form" action="{{ url_for('loader') }}" method="get" novalidate>
                 <div class="space-y-4">
                     <!-- URL Field -->
                     <div>
-                        <label for="url-input" class="justify-center text-sm font-medium text-gray-700">Quickly analyze YouTube Kids videos for safety and suitability.</label>
+                        <label for="url-input" class="justify-center text-sm font-medium text-gray-700">Quickly analyze
+                            YouTube Kids videos for safety and suitability.</label>
                         <br />
                         <br />
-                        <!-- Youtube Kids logo -->
-                        <!-- Centered image + label -->
+
                         <div class="flex flex-col items-center">
                             <img src="../static/img/youtube-kids.png" alt="Demo video preview"
                                 class="mx-auto w-9/12 h-20rem" />
@@ -112,13 +102,13 @@
 
                         <br />
                         <input type="url" id="url-input" name="url" required placeholder="https://www.example.com"
-                            class="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg">
+                            class="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg" required>
                     </div>
 
                     <!-- Submit Button -->
                     <div>
                         <button type="submit" id="submit-button"
-                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed">
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:scale-105 opacity-100 disabled:cursor-not-allowed %">
                             Submit
                         </button>
                     </div>
@@ -135,23 +125,23 @@
                 </div>
 
                 <!-- Summary Output -->
-                <div id="summary-output" class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <!-- <div id="summary-output" class="p-4 bg-gray-50 rounded-lg border border-gray-200"> -->
                     <!-- Content will be injected here -->
-                </div>
+                <!-- </div> -->
 
                 <!-- Sources Output -->
-                <div id="sources-container" class="mt-4">
+                <!-- <div id="sources-container" class="mt-4">
                     <h3 class="text-sm font-medium text-gray-600">Sources used for this summary:</h3>
                     <ul id="sources-list" class="list-disc list-inside text-sm text-gray-500">
                         <!-- Sources will be injected here -->
                     </ul>
-                </div>
+                <!-- </div> -->
             </div>
         </div>
     </div>
 
     <!-- JS file -->
-    <script src="/static/js/form.js" defer></script>
+    <script src="../static/js/form.js" defer></script>
 </body>
 
 </html>
