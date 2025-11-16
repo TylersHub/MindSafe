@@ -15,16 +15,17 @@
             <div class="nav__brand">
                 <div class="nav__logo-icon">
                     <a href="/">
-                        <img class="nav__logo-image" src="../static/img/mind.png" alt="MindSafe logo" />
+                        <img class="nav__logo-image" src="/static/img/mind.png" alt="MindSafe logo" />
                     </a>
                 </div>
                 <span class="nav__logo-text">MindSafe</span>
             </div>
 
             <nav class="nav__links">
-                <a href="#shows">Clips</a>
+                <a href="#shows">Examples</a>
                 <a href="#metrics">Metrics</a>
                 <a href="#extension">Extension</a>
+                <a href="#demo">How It Works</a>
             </nav>
 
             <div class="nav__cta">
@@ -49,7 +50,7 @@
                     </p>
 
                     <div class="hero__actions">
-                        <a href="{{ url_for('index') }}" class="btn btn--primary">Start Free Trial</a>
+                        <a href="/templates/index.html" class="btn btn--primary">Start Free Trial</a>
                         <a href="#demo" class="btn btn--secondary">View Demo</a>
                     </div>
 
@@ -68,7 +69,7 @@
                 <div class="hero__media">
                     <div class="hero__media-inner">
                         <div class="hero__brain">
-                            <img class="hero__brain-image" src="../static/img/young-boy-watching-tablet.jpg"
+                            <img class="hero__brain-image" src="/static/img/young-boy-watching-tablet.jpg"
                                 alt="3D Brain Simulation" />
                         </div>
                     </div>
@@ -78,7 +79,7 @@
     </main>
 
 
-    <!-- Trusted By Section -->
+    <!-- ====== TRUSTED BY SECTION ====== -->
     <section class="trust">
         <div class="container trust__inner">
             <p class="trust__label">
@@ -94,7 +95,7 @@
         </div>
     </section>
 
-    <!-- Demo Section -->
+    <!-- ====== DEMO SECTION (“See it in action”) ====== -->
     <section class="demo" id="demo">
         <div class="container demo__inner">
             <div class="demo__header">
@@ -107,6 +108,21 @@
 
             <div class="demo-card">
                 <div class="demo-card__inner">
+                    <!-- Play button / overlay -->
+                    <!-- <button class="demo-card__play" type="button">
+              <span class="demo-card__play-ring"></span>
+              <span class="demo-card__play-circle">
+                <span class="demo-card__play-icon">▶</span>
+              </span>
+            </button> -->
+
+                    <!-- <div class="demo-card__meta">
+              <div class="demo-card__label">Watch Demo</div>
+              <div class="demo-card__duration">3 minutes</div>
+            </div> -->
+
+                    <!-- Optional REAL video (replace src and remove the comment when ready) -->
+
                     <video class="demo-card__video" src="../static/img/rick.mp4" controls></video>
 
                 </div>
@@ -116,21 +132,15 @@
     </main>
 
     <!-- Metrics section -->
-    <div id="metrics">
-        {% include 'metrics.html' %}
-    </div>
+    <div id="metrics"></div>
 
-    <!-- Shows section -->
-    <div id="shows">
-        {% include 'shows.html' %}
-    </div>
-
+    <!-- Example section -->
+    <div id="shows"></div>
+    
     <!-- Extension section -->
-    <div id="extension">
-        {% include 'extension.html' %}
-    </div>
+    <div id="extension"></div>
 
-    <!-- Footer Section -->
+    <!-- ======  FOOTER SECTION ====== -->
     <section class="cta-footer">
         <div class="cta-footer__gradient">
             <div class="container cta-footer__inner">
@@ -157,8 +167,8 @@
                     </form>
                 </div>
 
-                <!-- animal on the right -->
-                <img src="../static/img/koala.png" alt="Friendly mascot" class="cta-footer__mascot" />
+                <!-- Cute animal on the right -->
+                <img src="/static/img/koala.png" alt="Friendly mascot" class="cta-footer__mascot" />
             </div>
         </div>
 
@@ -176,7 +186,7 @@
                 <div class="nav__brand">
                     <div class="nav__logo-icon">
                         <a href="/">
-                            <img class="nav__logo-image" src="../static/img/mind.png" alt="MindSafe logo" />
+                            <img class="nav__logo-image" src="/static/img/mind.png" alt="MindSafe logo" />
                         </a>
                     </div>
                     <span class="nav__logo-text">MindSafe</span>
@@ -186,7 +196,34 @@
     </section>
 
     <!-- Scripts -->
-    <script src="../static/js/app.js"></script>
+    <script>
+        fetch('../templates/metrics.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('metrics').innerHTML = html;
+            })
+            .catch(err => console.error('Error loading metrics:', err));
+    </script>
+
+    <script>
+        fetch('../templates/shows.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('shows').innerHTML = html;
+            })
+            .catch(err => console.error('Error loading metrics:', err));
+    </script>
+
+    <script>
+        fetch('../templates/extension.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('extension').innerHTML = html;
+            })
+            .catch(err => console.error('Error loading extension:', err));
+    </script>
+
+    <script src="/static/js/app.js"></script>
 </body>
 
 </html>

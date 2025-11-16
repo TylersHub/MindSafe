@@ -7,12 +7,14 @@
     "Helvetica Neue", Arial, sans-serif;
 }
 
+/* Page title */
 .ext-body h1 {
   margin-top: 40px;
   font-size: 32px;
   font-weight: 700;
 }
 
+/* Two-column layout */
 .ext-inner {
   max-width: 1100px;
   margin: 0 auto;
@@ -22,6 +24,7 @@
   align-items: flex-start;
 }
 
+/* LEFT 50% */
 .ext-left {
   width: 50%;
 }
@@ -44,6 +47,7 @@
   line-height: 1.6;
 }
 
+/* RIGHT 50% */
 .ext-right {
   width: 50%;
   text-align: left;
@@ -87,7 +91,7 @@
   box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
 }
 
-/* Meta info button */
+/* Meta info under button */
 .ext-meta {
   font-size: 22px;
   line-height: 1.5;

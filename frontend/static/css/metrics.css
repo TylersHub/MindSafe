@@ -47,6 +47,7 @@
   font-weight: 500;
 }
 
+/* Learn more button */
 .cta-btn {
   margin-top: 70px;
   padding: 14px 40px;
@@ -60,11 +61,12 @@
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
 }
 
+/* Simple hover for the button (optional) */
 .cta-btn:hover {
   transform: translateY(-1px);
 }
 
-/* Responsive Stack */
+/* Responsive tweaks */
 @media (max-width: 900px) {
   .framework-inner {
     margin: 60px 24px 80px;
