@@ -178,7 +178,15 @@ function renderPanel(data) {
               "<ul style='padding-left:16px; margin:4px 0;'> " +
               Object.keys(prettyNames)
                 .map((key) => {
-                  const v = dim[key];
+                  // Support both lowercase keys and capitalized keys
+                  const rawKey = key;
+                  const apiKey = prettyNames[key]; // e.g., "Pacing"
+                  const v =
+                    typeof dim[rawKey] === "number"
+                      ? dim[rawKey]
+                      : typeof dim[apiKey] === "number"
+                      ? dim[apiKey]
+                      : null;
                   const score =
                     typeof v === "number" ? `${v.toFixed(1)}/100` : "N/A";
                   return `<li><b>${prettyNames[key]}:</b> ${score}</li>`;

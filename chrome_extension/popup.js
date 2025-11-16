@@ -57,9 +57,15 @@ function renderResult(r) {
       "<ul>" +
       Object.keys(prettyNames)
         .map((key) => {
-          const v = dim[key];
-          const score =
-            typeof v === "number" ? `${v.toFixed(1)}/100` : "N/A";
+          const rawKey = key;
+          const apiKey = prettyNames[key]; // e.g., "Pacing"
+          const v =
+            typeof dim[rawKey] === "number"
+              ? dim[rawKey]
+              : typeof dim[apiKey] === "number"
+              ? dim[apiKey]
+              : null;
+          const score = typeof v === "number" ? `${v.toFixed(1)}/100` : "N/A";
           return `<li><b>${prettyNames[key]}:</b> ${score}</li>`;
         })
         .join("") +
