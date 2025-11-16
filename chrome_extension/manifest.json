@@ -8,7 +8,8 @@
     "https://www.youtube.com/*",
     "https://youtu.be/*",
     "https://www.youtubekids.com/*",
-    "https://kids.youtube.com/*"
+    "https://kids.youtube.com/*",
+    "http://localhost:5001/*"
   ],
   "background": {
     "service_worker": "background.js"

@@ -1,36 +1,21 @@
 """
 Configuration module for video data extraction.
-Handles environment variables and API client initialization.
+Handles environment variables and processing defaults.
+
+Note: All language/vision modeling is now done via the OpenRouter-backed
+Gemini client in `evaluation.llm_client`. This module no longer initializes
+any OpenAI-specific clients.
 """
 
 import os
 from dotenv import load_dotenv
-import openai
 
 # Load environment variables from .env file
 load_dotenv()
 
-# OpenAI Configuration
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-VISION_MODEL = os.getenv("OPENAI_VISION_MODEL", "gpt-4o")
-TRANSCRIBE_MODEL = os.getenv("OPENAI_TRANSCRIBE_MODEL", "gpt-4o-transcribe")
-
-if not OPENAI_API_KEY:
-    raise RuntimeError(
-        "OPENAI_API_KEY is not set. Set it as an environment variable "
-        "or add it to the .env file."
-    )
-
-# Initialize OpenAI client (compatible with both old and new API versions)
-try:
-    from openai import OpenAI
-    client = OpenAI(api_key=OPENAI_API_KEY)
-    OPENAI_V1 = True
-except ImportError:
-    # Old API (openai < 1.0.0)
-    openai.api_key = OPENAI_API_KEY
-    client = None
-    OPENAI_V1 = False
+# OpenRouter / Gemini configuration (used indirectly by evaluation.llm_client)
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+VISION_MODEL = os.getenv("OPENROUTER_VISION_MODEL", "google/gemini-2.0-flash-exp")
 
 
 # Processing Configuration

@@ -14,16 +14,16 @@ source venv/bin/activate
 python api.py
 ```
 
-The API will start on `http://localhost:5000`
+The API will start on `http://localhost:5001`
 
 ### 2. Test the API
 
 ```bash
 # Health check
-curl http://localhost:5000/health
+curl http://localhost:5001/health
 
 # Evaluate a video
-curl "http://localhost:5000/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw&age=4"
+curl "http://localhost:5001/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw&age=4"
 ```
 
 ---
@@ -37,6 +37,7 @@ curl "http://localhost:5000/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw
 Check if the API is running.
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -55,18 +56,20 @@ Evaluate a YouTube video for developmental appropriateness.
 
 **Query Parameters:**
 
-| Parameter | Required | Type | Description |
-|-----------|----------|------|-------------|
-| `url` | ✅ Yes | string | YouTube video URL |
-| `age` | ✅ Yes | float | Child's age in years (0-18) |
-| `skip_extraction` | ⚪ No | boolean | Skip download/extraction (default: false) |
+| Parameter         | Required | Type    | Description                               |
+| ----------------- | -------- | ------- | ----------------------------------------- |
+| `url`             | ✅ Yes   | string  | YouTube video URL                         |
+| `age`             | ✅ Yes   | float   | Child's age in years (0-18)               |
+| `skip_extraction` | ⚪ No    | boolean | Skip download/extraction (default: false) |
 
 **Example Request:**
+
 ```bash
-curl "http://localhost:5000/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw&age=4"
+curl "http://localhost:5001/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw&age=4"
 ```
 
 **Example Response:**
+
 ```json
 {
   "video_path": "/path/to/video.mp4",
@@ -104,9 +107,7 @@ curl "http://localhost:5000/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw
     "Story: Excellent (100/100)",
     "Fantasy: Excellent (100/100)"
   ],
-  "concerns": [
-    "Interactivity: Needs improvement (0/100)"
-  ],
+  "concerns": ["Interactivity: Needs improvement (0/100)"],
   "recommendations": [
     "Consider content with more direct viewer engagement",
     "Excellent narrative structure for this age group",
@@ -116,6 +117,7 @@ curl "http://localhost:5000/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw
 ```
 
 **Status Codes:**
+
 - `200` - Success
 - `400` - Bad Request (missing or invalid parameters)
 - `404` - Video not found
@@ -130,6 +132,7 @@ curl "http://localhost:5000/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw
 ⚠️ **Currently not implemented** - Placeholder for future use.
 
 **Expected JSON Body:**
+
 ```json
 {
   "url": "https://youtube.com/watch?v=VIDEO_ID",
@@ -142,6 +145,7 @@ curl "http://localhost:5000/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw
 ```
 
 **Response:**
+
 ```json
 {
   "error": "Not implemented",
@@ -158,14 +162,13 @@ curl "http://localhost:5000/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw
 Create a `.env` file:
 
 ```bash
-OPENAI_API_KEY=sk-your-key-here
-OPENAI_VISION_MODEL=gpt-4o
-OPENAI_TRANSCRIBE_MODEL=whisper-1
+OPENROUTER_API_KEY=your-openrouter-api-key-here
 ```
 
 ### API Configuration
 
 Edit `api.py` to change:
+
 - Port: `app.run(port=5000)`
 - Host: `app.run(host='0.0.0.0')`
 - Debug mode: `app.run(debug=True)`
@@ -177,6 +180,7 @@ Edit `api.py` to change:
 ### Scores
 
 - **`dev_score`** (0-100): Developmental value score
+
   - Higher is better
   - Based on age-appropriate metrics
   - Weighted across 6 dimensions
@@ -198,6 +202,7 @@ Edit `api.py` to change:
 ### Metrics
 
 Detailed measurements including:
+
 - Shot length and cut frequency
 - Text complexity (TTR, utterance length)
 - Content analysis (prosocial, aggression)
@@ -214,7 +219,7 @@ import requests
 
 # Evaluate video
 response = requests.get(
-    'http://localhost:5000/evaluate',
+    'http://localhost:5001/evaluate',
     params={
         'url': 'https://youtube.com/watch?v=jNQXAC9IVRw',
         'age': 4
@@ -229,13 +234,13 @@ print(f"Brainrot Index: {results['brainrot_index']}")
 ### JavaScript (fetch)
 
 ```javascript
-const url = 'http://localhost:5000/evaluate?url=YOUTUBE_URL&age=4';
+const url = "http://localhost:5001/evaluate?url=YOUTUBE_URL&age=4";
 
 fetch(url)
-  .then(response => response.json())
-  .then(data => {
-    console.log('Dev Score:', data.dev_score);
-    console.log('Brainrot Index:', data.brainrot_index);
+  .then((response) => response.json())
+  .then((data) => {
+    console.log("Dev Score:", data.dev_score);
+    console.log("Brainrot Index:", data.brainrot_index);
   });
 ```
 
@@ -243,24 +248,24 @@ fetch(url)
 
 ```bash
 # Basic evaluation
-curl "http://localhost:5000/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw&age=4"
+curl "http://localhost:5001/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw&age=4"
 
 # Pretty print JSON
-curl -s "http://localhost:5000/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw&age=4" | python -m json.tool
+curl -s "http://localhost:5001/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw&age=4" | python -m json.tool
 
 # Save to file
-curl "http://localhost:5000/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw&age=4" > results.json
+curl "http://localhost:5001/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw&age=4" > results.json
 ```
 
 ---
 
 ## ⏱️ Processing Time
 
-| Video Length | API Response Time | API Cost |
-|--------------|-------------------|----------|
-| 5 minutes | ~3-5 minutes | ~$0.10-0.20 |
-| 15 minutes | ~8-15 minutes | ~$0.30-0.50 |
-| 30 minutes | ~15-30 minutes | ~$0.50-1.00 |
+| Video Length | API Response Time | API Cost    |
+| ------------ | ----------------- | ----------- |
+| 5 minutes    | ~3-5 minutes      | ~$0.10-0.20 |
+| 15 minutes   | ~8-15 minutes     | ~$0.30-0.50 |
+| 30 minutes   | ~15-30 minutes    | ~$0.50-1.00 |
 
 **Note:** Processing happens synchronously. Consider implementing async/queue for production.
 
@@ -278,6 +283,7 @@ curl "http://localhost:5000/evaluate?url=https://youtube.com/watch?v=jNQXAC9IVRw
 6. **Environment**: Use production WSGI server (gunicorn, uwsgi)
 
 Example with gunicorn:
+
 ```bash
 pip install gunicorn
 gunicorn -w 4 -b 0.0.0.0:5000 api:app
@@ -297,14 +303,14 @@ lsof -i :5000
 python api.py  # Edit port in api.py
 ```
 
-### API key errors
+### API key errors (OpenRouter)
 
 ```bash
 # Verify .env file exists
 cat .env
 
 # Check environment variable
-echo $OPENAI_API_KEY
+echo $OPENROUTER_API_KEY
 ```
 
 ### Module not found
@@ -345,7 +351,7 @@ CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "--timeout", "600", "api:app"]
 ### Environment Variables for Production
 
 ```bash
-OPENAI_API_KEY=your-key
+OPENROUTER_API_KEY=your-openrouter-api-key-here
 FLASK_ENV=production
 FLASK_DEBUG=0
 ```
@@ -370,6 +376,7 @@ FLASK_DEBUG=0
 Current version: **v1.0.0**
 
 Future versions will use URL versioning:
+
 - `/v1/evaluate`
 - `/v2/evaluate`
 
@@ -377,5 +384,4 @@ Future versions will use URL versioning:
 
 **Made with ❤️ for protecting children's development**
 
-*HackNYU 2025*
-
+_HackNYU 2025_

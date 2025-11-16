@@ -290,9 +290,10 @@ TIER1_VOCAB = {
     "green", "yellow", "black", "white", "happy", "sad", "fun", "love", "ok", "okay"
 }
 
-# LLM Configuration
+# LLM Configuration (used via OpenRouter / Gemini)
 LLM_CONFIG = {
-    "model": "gpt-3.5-turbo",  # Compatible with openai 0.28.x
+    # Default Gemini model served through OpenRouter; can be overridden with OPENROUTER_MODEL.
+    "model": "google/gemini-2.0-flash-exp",
     "temperature": 0.1,  # Low temperature for consistent labeling
     "max_tokens": 2000,
     "segment_duration": 30,  # seconds per segment for LLM analysis

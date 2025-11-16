@@ -1,22 +1,84 @@
 // popup.js
+//
+// Shows the latest MindSafe evaluation for the last analyzed video.
 
 function renderResult(r) {
   const resultDiv = document.getElementById("result");
   if (!r) {
-    resultDiv.innerText = "No video analyzed yet. Click a video, then reopen this popup.";
+    resultDiv.innerText =
+      "No video analyzed yet. Open a YouTube / YouTube Kids video, wait for MindSafe to finish, then reopen this popup.";
     return;
   }
 
-  const copiedText = r.copied
-    ? `<div style="color:green"><b>Copied:</b> <a href="${r.videoUrl}" target="_blank">${r.videoUrl}</a></div>`
-    : `<div><b>Link:</b> <a href="${r.videoUrl}" target="_blank">${r.videoUrl}</a></div>`;
+  if (r.status === "pending") {
+    resultDiv.innerHTML = `
+      <div><b>Status:</b> Analysis in progress…</div>
+      <div><b>Title:</b> ${r.title || "Video"}</div>
+      <div><b>Link:</b> <a href="${r.videoUrl}" target="_blank">${r.videoUrl}</a></div>
+    `;
+    return;
+  }
+
+  if (r.status === "error") {
+    resultDiv.innerHTML = `
+      <div style="color:red"><b>Status:</b> Analysis failed</div>
+      <div><b>Title:</b> ${r.title || "Video"}</div>
+      <div><b>Link:</b> <a href="${r.videoUrl}" target="_blank">${r.videoUrl}</a></div>
+      <div><b>Error:</b> ${r.error || "Unknown error"}</div>
+    `;
+    return;
+  }
+
+  const devScore =
+    typeof r.devScore === "number" ? `${r.devScore.toFixed(1)}/100` : "N/A";
+  const brainrot =
+    typeof r.brainrotIndex === "number" ? `${r.brainrotIndex.toFixed(1)}/100` : "N/A";
+  const tenPoint =
+    typeof r.tenPointScore === "number" ? `${r.tenPointScore}/10` : "N/A";
+
+  const reasonsText = Array.isArray(r.reasons) ? r.reasons.join(", ") : "";
+
+  const dim =
+    r.rawApiResult && r.rawApiResult.dimension_scores
+      ? r.rawApiResult.dimension_scores
+      : null;
+
+  let dimHtml = "";
+  if (dim) {
+    const prettyNames = {
+      pacing: "Pacing",
+      story: "Story",
+      language: "Language",
+      sel: "Social-Emotional Learning",
+      fantasy: "Fantasy",
+      interactivity: "Interactivity",
+    };
+    dimHtml =
+      "<ul>" +
+      Object.keys(prettyNames)
+        .map((key) => {
+          const v = dim[key];
+          const score =
+            typeof v === "number" ? `${v.toFixed(1)}/100` : "N/A";
+          return `<li><b>${prettyNames[key]}:</b> ${score}</li>`;
+        })
+        .join("") +
+      "</ul>";
+  }
 
   resultDiv.innerHTML = `
-    <div><b>Score:</b> <span class="score">${r.score}/10</span></div>
-    <div><b>Rating:</b> ${r.label}</div>
-    <div><b>Title:</b> ${r.title}</div>
-    ${copiedText}
-    <div><b>Reasons:</b> ${Array.isArray(r.reasons) ? r.reasons.join(", ") : ""}</div>
+    <div><b>Overall rating:</b> <span class="score">${tenPoint}</span></div>
+    <div><b>Label:</b> ${r.label || "N/A"}</div>
+    <div><b>Developmental score:</b> ${devScore}</div>
+    <div><b>Brainrot index:</b> ${brainrot}</div>
+    <div><b>Title:</b> ${r.title || "Video"}</div>
+    <div><b>Link:</b> <a href="${r.videoUrl}" target="_blank">${r.videoUrl}</a></div>
+    <div><b>Reasons:</b> ${reasonsText}</div>
+    ${
+      dimHtml
+        ? `<div><b>Dimension scores:</b>${dimHtml}</div>`
+        : ""
+    }
   `;
 }
 
@@ -35,7 +97,9 @@ chrome.runtime.sendMessage({ type: "GET_LAST_SCORE" }, (resp) => {
         }
       });
     } catch (e) {
-      resultDiv.innerHTML = `<div style="color:red"><b>Storage exception:</b> ${e && e.message}</div>`;
+      resultDiv.innerHTML = `<div style="color:red"><b>Storage exception:</b> ${
+        e && e.message
+      }</div>`;
     }
     return;
   }
@@ -48,12 +112,4 @@ chrome.runtime.sendMessage({ type: "GET_LAST_SCORE" }, (resp) => {
   renderResult(resp && resp.lastScore);
 });
 
-// Listen for storage error broadcasts (optional)
-chrome.runtime.onMessage.addListener((msg) => {
-  if (msg && msg.type === "STORAGE_ERROR") {
-    const resultDiv = document.getElementById("result");
-    if (resultDiv) {
-      resultDiv.innerHTML = `<div style="color:red"><b>Storage error:</b> ${msg.error}</div>`;
-    }
-  }
-});
+

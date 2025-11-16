@@ -158,7 +158,7 @@ def process_youtube_video(
         )
         log(f"✓ Audio fully transcribed ({len(speech_transcript)} characters)")
 
-        # 4) Generate multimodal analysis
+        # 4) Generate multimodal analysis (FAST MODE)
         if use_chunked_processing:
             log("Step 4/6: Using CHUNKED processing for comprehensive video analysis...")
             log(f"         Segments: {segment_duration}s each, {frames_per_segment} frames/segment")
@@ -171,18 +171,23 @@ def process_youtube_video(
             )
             log(f"✓ Comprehensive video analysis complete ({len(vllm_transcript)} characters)")
         else:
-            log(f"Step 4/6: Simple single-pass processing...")
-            vllm_transcript = f"Simple processing mode.\n\nSpeech transcript:\n{speech_transcript}"
+            # FAST MODE: skip frame extraction and LLM visual analysis.
+            log("Step 4/6: FAST MODE - skipping visual LLM analysis, using speech transcript only...")
+            vllm_transcript = f"[FAST MODE] Visual analysis skipped.\n\nSpeech transcript:\n{speech_transcript}"
             log(f"✓ Simple transcript assembled ({len(vllm_transcript)} characters)")
-
-        # 5) Generate dialogue transcript
-        log("Step 5/6: Generating structured dialogue transcript...")
-        dialogue_transcript = generate_dialogue_transcript(speech_transcript)
-        log(f"✓ Dialogue transcript generated ({len(dialogue_transcript)} characters)")
-
-        # 6) Generate scene summary
-        log("Step 6/6: Generating scene-by-scene summary and global evaluation...")
-        scene_summary = generate_scene_summary(vllm_transcript)
+        
+        # 5) Generate dialogue transcript (FAST MODE - reuse speech text)
+        log("Step 5/6: FAST MODE - generating lightweight dialogue transcript...")
+        dialogue_transcript = speech_transcript
+        log(f"✓ Dialogue transcript assembled ({len(dialogue_transcript)} characters)")
+        
+        # 6) Generate scene summary (FAST MODE - placeholder)
+        log("Step 6/6: FAST MODE - generating simple scene summary...")
+        scene_summary = (
+            "[FAST MODE] Detailed scene-by-scene summary disabled for speed.\n\n"
+            "Use the developmental scores and brainrot index from the evaluator "
+            "for decision making."
+        )
         log(f"✓ Scene summary generated ({len(scene_summary)} characters)")
 
         # Copy media files

@@ -145,30 +145,32 @@ def evaluate_video(video_path: str,
     print(f"  Mean utterance length: {text_basic.get('mean_utterance_length', 0):.1f} words")
     print(f"  Question rate: {text_basic.get('question_rate', 0):.1f} per minute")
     
-    # Step 4: Compute semantic metrics via LLM
-    print("\nStep 4: Computing semantic metrics (LLM)...")
-    segment_labels = llm_label_segments(
-        transcript_segments, 
-        llm_client,
-        chunk_duration=LLM_CONFIG["segment_duration"]
-    )
-    print(f"  Labeled {len(segment_labels)} segments")
+    # Step 4: Semantic metrics (FAST MODE - skip LLM)
+    print("\nStep 4: Computing semantic metrics (fast mode, no LLM)...")
+    # Use neutral, fast defaults instead of expensive LLM analysis
+    semantic_metrics = {
+        "prosocial_rate": 0.0,
+        "aggression_rate": 0.0,
+        "prosocial_ratio": 0.5,
+        "sel_strategy_rate": 0.0,
+        "direct_address_rate": 0.0,
+        "interactive_block_count": 0,
+        "fantasy_rate": 0.0,
+        "impossible_event_rate": 0.0,
+        "fear_intense_rate": 0.0,
+    }
+    print(f"  Prosocial rate: {semantic_metrics['prosocial_rate']:.1f} per minute")
+    print(f"  Aggression rate: {semantic_metrics['aggression_rate']:.1f} per minute")
+    print(f"  Prosocial ratio: {semantic_metrics['prosocial_ratio']:.2f}")
     
-    semantic_metrics = compute_event_metrics_from_labels(segment_labels, duration_min)
-    print(f"  Prosocial rate: {semantic_metrics.get('prosocial_rate', 0):.1f} per minute")
-    print(f"  Aggression rate: {semantic_metrics.get('aggression_rate', 0):.1f} per minute")
-    print(f"  Prosocial ratio: {semantic_metrics.get('prosocial_ratio', 0):.2f}")
-    
-    # Step 5: Compute narrative coherence
-    print("\nStep 5: Computing narrative coherence...")
-    narrative_metrics = compute_narrative_metrics(
-        transcript_segments,
-        llm_client=llm_client,
-        use_embeddings=True,
-        chunk_duration=LLM_CONFIG["segment_duration"]
-    )
-    print(f"  Adjacent similarity: {narrative_metrics.get('adjacent_similarity_mean', 0):.2f}")
-    print(f"  Topic jumps: {narrative_metrics.get('topic_jumps', 0):.2f}")
+    # Step 5: Narrative coherence (FAST MODE - no embeddings/LLM)
+    print("\nStep 5: Computing narrative coherence (fast defaults)...")
+    narrative_metrics = {
+        "adjacent_similarity_mean": 0.7,
+        "topic_jumps": 0.2,
+    }
+    print(f"  Adjacent similarity: {narrative_metrics['adjacent_similarity_mean']:.2f}")
+    print(f"  Topic jumps: {narrative_metrics['topic_jumps']:.2f}")
     
     # Step 6: Merge all raw metrics
     print("\nStep 6: Merging metrics...")
@@ -308,7 +310,7 @@ def main():
     )
     parser.add_argument(
         "--api-key",
-        help="OpenAI API key (or set OPENAI_API_KEY env var)"
+        help="OpenRouter API key (or set OPENROUTER_API_KEY env var)"
     )
     
     args = parser.parse_args()
@@ -322,9 +324,9 @@ def main():
         print(f"Warning: Age {args.age} is outside typical range (0-8 years)")
     
     # Initialize LLM client
-    api_key = args.api_key or os.getenv("OPENAI_API_KEY")
+    api_key = args.api_key or os.getenv("OPENROUTER_API_KEY")
     if not api_key:
-        print("Error: OpenAI API key required. Set OPENAI_API_KEY env var or use --api-key")
+        print("Error: OpenRouter API key required. Set OPENROUTER_API_KEY env var or use --api-key")
         sys.exit(1)
     
     llm_client = LLMClient(api_key=api_key)

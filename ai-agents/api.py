@@ -24,7 +24,6 @@ sys.path.insert(0, str(PROJECT_ROOT / "evaluation"))
 sys.path.insert(0, str(PROJECT_ROOT / "video_data_extraction"))
 
 from evaluation.evaluate_video import evaluate_video, save_results
-from evaluation.llm_client import LLMClient
 
 app = Flask(__name__)
 
@@ -46,6 +45,7 @@ def extract_video_data(youtube_url: str, output_dir: Path) -> dict:
     result = process_youtube_video(
         youtube_url,
         str(output_dir),
+        use_chunked_processing=False,  # FAST MODE: avoid visual LLM path
         segment_duration=30.0,
         frames_per_segment=20,
         audio_chunk_duration=60.0,
@@ -54,14 +54,14 @@ def extract_video_data(youtube_url: str, output_dir: Path) -> dict:
     return result
 
 
-def evaluate_extracted_video(output_dir: Path, child_age: float, api_key: str) -> dict:
+def evaluate_extracted_video(output_dir: Path, child_age: float, api_key: str | None) -> dict:
     """
     Evaluate extracted video content.
     
     Args:
         output_dir: Directory containing extracted video data
         child_age: Age of child in years
-        api_key: OpenAI API key
+        api_key: (unused in fast mode; kept for future LLM-enabled mode)
         
     Returns:
         Dictionary with evaluation results
@@ -72,20 +72,19 @@ def evaluate_extracted_video(output_dir: Path, child_age: float, api_key: str) -
         raise FileNotFoundError(f"Video not found: {video_path}")
     
     print(f"[API] Evaluating video for age {child_age}...")
-    
-    # Initialize LLM client
-    llm_client = LLMClient(api_key=api_key)
-    
-    # Run evaluation
+
+    # Run evaluation in FAST MODE (no LLM, no heavy motion analysis)
     results = evaluate_video(
         video_path=str(video_path),
         child_age=child_age,
-        llm_client=llm_client,
-        outputs_dir=str(output_dir)  # Fixed: parameter is outputs_dir not output_dir
+        llm_client=None,
+        outputs_dir=str(output_dir),
+        compute_motion=False,
     )
     
     # Save results
-    results_path = save_results(results, output_dir)
+    results_path = output_dir / "evaluation_results.json"
+    save_results(results, str(results_path))
     print(f"[API] Results saved to: {results_path}")
     
     return results
@@ -146,13 +145,8 @@ def evaluate_get():
                 "message": "Age must be a number (e.g., 4 or 4.5)"
             }), 400
         
-        # Check API key
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            return jsonify({
-                "error": "API key not configured",
-                "message": "OPENAI_API_KEY environment variable is not set"
-            }), 500
+        # API key is optional in fast mode (LLM disabled by default)
+        api_key = os.getenv("OPENROUTER_API_KEY")
         
         # Determine output directory
         if use_existing:
@@ -263,11 +257,6 @@ def internal_error(e):
 
 
 if __name__ == '__main__':
-    # Check for API key
-    if not os.getenv("OPENAI_API_KEY"):
-        print("WARNING: OPENAI_API_KEY environment variable is not set!")
-        print("Set it in your .env file or as an environment variable.")
-    
     # Run the Flask app
     print("=" * 70)
     print("  Children's Video Content Evaluator API")
