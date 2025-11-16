@@ -34,8 +34,8 @@ def create_logger():
 
 def safe_responses_create(client, *args, **kwargs) -> str:
     """
-    Wrapper around client.responses.create that never crashes the pipeline.
-    Returns the text output or None on failure.
+    Legacy helper for LLM calls that should never crash the pipeline.
+    Kept for backward compatibility but no longer used with OpenAI.
     """
     try:
         resp = client.responses.create(*args, **kwargs)
@@ -47,6 +47,6 @@ def safe_responses_create(client, *args, **kwargs) -> str:
                 return part.text
         return None
     except Exception as e:
-        print(f"[ERROR] OpenAI responses.create failed: {e}")
+        print(f"[ERROR] LLM responses.create failed: {e}")
         return None
 

@@ -37,11 +37,11 @@ echo ""
 # Setup .env file
 if [ ! -f .env ]; then
     echo "📝 Creating .env file..."
-    cp .env.example .env
+    cp .env.example .env 2>/dev/null || touch .env
     echo "✅ .env file created"
     echo ""
-    echo "⚠️  IMPORTANT: Edit .env and add your OpenAI API key:"
-    echo "   OPENAI_API_KEY=sk-your-api-key-here"
+    echo "⚠️  IMPORTANT: Edit .env and add your OpenRouter API key:"
+    echo "   OPENROUTER_API_KEY=your-openrouter-api-key-here"
     echo ""
 else
     echo "✅ .env file already exists"
@@ -50,12 +50,12 @@ fi
 
 # Check if API key is set
 source .env 2>/dev/null
-if [ -z "$OPENAI_API_KEY" ] || [ "$OPENAI_API_KEY" = "your-api-key-here" ]; then
-    echo "⚠️  OpenAI API key not configured"
+if [ -z "$OPENROUTER_API_KEY" ] || [ "$OPENROUTER_API_KEY" = "your-openrouter-api-key-here" ]; then
+    echo "⚠️  OpenRouter API key not configured"
     echo "   Please edit .env and add your API key"
     echo ""
 else
-    echo "✅ OpenAI API key is configured"
+    echo "✅ OpenRouter API key is configured"
     echo ""
 fi
 
@@ -64,7 +64,7 @@ echo "             Setup Complete!"
 echo "=================================================="
 echo ""
 echo "Next steps:"
-echo "  1. If needed, edit .env and add your OpenAI API key"
+echo "  1. If needed, edit .env and add your OpenRouter API key"
 echo "  2. Run: python main.py"
 echo ""
 echo "For help, see: README_MAIN.md"

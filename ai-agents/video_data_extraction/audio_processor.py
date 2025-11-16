@@ -1,18 +1,18 @@
 """
 Audio extraction and transcription functionality.
 Includes chunked processing to avoid token limits.
+
+All transcription is now done locally using the Whisper model (no OpenAI API).
 """
 
 import subprocess
 from pathlib import Path
 from typing import List
 
-import openai
-
 try:
-    from .config import client, TRANSCRIBE_MODEL, OPENAI_V1
+    import whisper  # Local Whisper model
 except ImportError:
-    from config import client, TRANSCRIBE_MODEL, OPENAI_V1
+    whisper = None
 
 
 def extract_audio_and_muted_video(video_path: Path, out_dir: Path) -> dict:
@@ -148,23 +148,24 @@ def split_audio_into_chunks(
 
 
 def transcribe_audio_chunk(audio_chunk_path: Path, chunk_num: int) -> str:
-    """Transcribe a single audio chunk using OpenAI."""
+    """
+    Transcribe a single audio chunk using the local Whisper model.
+    """
+    if whisper is None:
+        print(
+            "  [ERROR] Local whisper not installed. Install with: `pip install openai-whisper`"
+        )
+        return f"[CHUNK {chunk_num} FAILED - whisper not installed]"
+
     try:
-        with open(audio_chunk_path, "rb") as f:
-            if OPENAI_V1:
-                # New API (openai >= 1.0.0)
-                transcription = client.audio.transcriptions.create(
-                    model="whisper-1",  # Use standard Whisper model
-                    file=f,
-                )
-                return transcription.text
-            else:
-                # Old API (openai < 1.0.0)
-                transcription = openai.Audio.transcribe(
-                    model="whisper-1",
-                    file=f,
-                )
-                return transcription.get('text', '') if isinstance(transcription, dict) else transcription.text
+        # For chunked processing we can use a small model for speed.
+        model = whisper.load_model("base")
+        # Explicitly disable fp16 to avoid CPU warnings
+        result = model.transcribe(
+            str(audio_chunk_path), word_timestamps=False, fp16=False
+        )
+        text = result.get("text", "").strip()
+        return text or f"[CHUNK {chunk_num} EMPTY]"
     except Exception as e:
         print(f"  [ERROR] Transcription of chunk {chunk_num} failed: {e}")
         return f"[CHUNK {chunk_num} FAILED]"
