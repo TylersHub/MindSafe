@@ -1,0 +1,32 @@
+# Core dependencies (required)
+openai>=1.0.0
+yt-dlp>=2023.0.0
+python-dotenv>=1.0.0
+numpy>=2.2.0
+flask>=3.0.0
+
+# Video processing (✅ installed and working!)
+opencv-python>=4.8.0
+scenedetect>=0.6.2
+
+# NLP embeddings (✅ installed and working!)
+sentence-transformers>=2.2.0
+
+# Optional dependencies for enhanced features
+# These are NOT required - the system works without them using fallback defaults
+# 
+# ❌ Audio processing (CANNOT install on Python 3.14 - numba limitation):
+# librosa>=0.10.0
+# soundfile>=0.12.0
+# Note: System uses sensible audio defaults when librosa is unavailable
+#
+# Local transcription:
+# openai-whisper
+#
+# Advanced NLP:
+# spacy
+
+# System requirements (install separately):
+# - FFmpeg: brew install ffmpeg (macOS) or apt-get install ffmpeg (Linux/Ubuntu)
+# - Python 3.8 or higher (3.14+ has limited library support)
+

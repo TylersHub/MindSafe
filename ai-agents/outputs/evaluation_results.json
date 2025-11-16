@@ -1,0 +1,69 @@
+{
+  "metadata": {
+    "video_path": "/Users/mateicoldea/Documents/Projects/Hackathons/HackNYU/outputs/video_with_audio.mp4",
+    "video_name": "video_with_audio.mp4",
+    "evaluation_timestamp": "2025-11-15T19:18:05.949231",
+    "child_age": 4.0,
+    "age_band": "G3_3_5",
+    "age_band_label": "Preschool",
+    "duration_seconds": 318.136599,
+    "duration_minutes": 5.30227665
+  },
+  "raw_metrics": {
+    "cuts_per_minute": 25.08356481173045,
+    "avg_shot_length": 2.3737562189054726,
+    "motion_mean": 2.3655004501342773,
+    "motion_high_frac": 0.24213836477987422,
+    "loudness_mean": -15.0,
+    "dynamic_range": 20.0,
+    "music_ratio": 0.3,
+    "sfx_rate": 2.0,
+    "type_token_ratio": 0.4,
+    "mean_utterance_length": 3.44311377245509,
+    "tier2_vocab_frac": 0.5478260869565217,
+    "question_rate": 10.0,
+    "emotion_word_rate": 0.0,
+    "mental_state_word_rate": 7.0,
+    "prosocial_rate": 0.18859823166714623,
+    "aggression_rate": 0.18859823166714623,
+    "prosocial_ratio": 0.5,
+    "sel_strategy_rate": 0.0,
+    "direct_address_rate": 0.0,
+    "interactive_block_count": 0,
+    "fantasy_rate": 0.67,
+    "impossible_event_rate": 0.18859823166714623,
+    "fear_intense_rate": 0.0,
+    "adjacent_similarity_mean": 1.0,
+    "topic_jumps": 0.0,
+    "duration_minutes": 5.30227665,
+    "duration_seconds": 318.136599
+  },
+  "dimension_scores": {
+    "Pacing": 89.42545023226961,
+    "Story": 100.0,
+    "Language": 60.55222887558217,
+    "SEL": 50.92564281079237,
+    "Fantasy": 100.0,
+    "Interactivity": 0.0
+  },
+  "overall_scores": {
+    "development_score": 66.28328545643407,
+    "brainrot_index": 19.914458828449327
+  },
+  "interpretations": {
+    "developmental": "Good - Generally appropriate with some areas for improvement",
+    "brainrot": "Very Low Risk - Safe and healthy content",
+    "overall": "Recommended"
+  },
+  "recommendations": {
+    "strengths": [
+      "Pacing: Excellent (89/100)",
+      "Story: Excellent (100/100)",
+      "Fantasy: Excellent (100/100)"
+    ],
+    "concerns": [
+      "Interactivity: Needs improvement (0/100)",
+      "Very fast pacing: 25.1 cuts per minute"
+    ]
+  }
+}
