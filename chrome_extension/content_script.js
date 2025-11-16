@@ -43,8 +43,8 @@ function findRightColumn() {
 function renderPanel(data) {
   const container = findRightColumn();
   if (!container) {
-    console.log("[MindSafe] right column not found yet");
-  return false;
+    // Right column not mounted yet; caller will keep polling.
+    return false;
   }
 
   let panel = document.getElementById("mindsafe-stats-panel");
@@ -55,17 +55,17 @@ function renderPanel(data) {
     panel.id = "mindsafe-stats-panel";
 
     panel.style.marginBottom = "10px";
-    panel.style.padding = "10px 12px";
-    panel.style.borderRadius = "14px";
+    panel.style.padding = "12px 14px";
+    panel.style.borderRadius = "16px";
     panel.style.boxSizing = "border-box";
     panel.style.fontFamily = "Roboto, Arial, sans-serif";
     panel.style.fontSize = "12px";
 
     panel.style.background =
-      "linear-gradient(135deg, rgba(239,246,255,0.96), rgba(255,255,255,0.96))";
+      "linear-gradient(135deg, rgba(187,247,208,0.96), rgba(219,234,254,0.98))";
     panel.style.color = "#111";
-    panel.style.boxShadow = "0 8px 20px rgba(15,23,42,0.18)";
-    panel.style.border = "1px solid rgba(148,163,184,0.4)";
+    panel.style.boxShadow = "0 10px 24px rgba(15,23,42,0.24)";
+    panel.style.border = "1px solid rgba(52,211,153,0.9)";
   }
 
   const status = data && data.status;
@@ -91,7 +91,7 @@ function renderPanel(data) {
       tenPointScore != null ? `${tenPointScore}` : "N/A";
     scoreHtml = `
       <div style="display:flex; align-items:baseline; gap:6px; margin-bottom:4px;">
-        <span style="font-size:26px; font-weight:700;">${scoreDisplay}</span>
+        <span class="mindsafe-score-value" style="font-size:26px; font-weight:700;">${scoreDisplay}</span>
         <span style="font-size:12px; opacity:0.8;">/ 10</span>
       </div>
     `;
@@ -117,8 +117,13 @@ function renderPanel(data) {
       : "";
 
   panel.innerHTML = `
-    <div style="font-size:11px; font-weight:600; opacity:0.8; margin-bottom:4px;">
-      MindSafe Content Score
+    <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+      <span style="width:20px; height:20px; border-radius:999px; background:linear-gradient(135deg,#22c55e,#0ea5e9); display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#f9fafb;">
+        MS
+      </span>
+      <span style="font-size:13px; font-weight:700; letter-spacing:0.02em; color:#065f46;">
+        MindSafe
+      </span>
     </div>
 
     <div id="mindsafe-score-main" style="cursor:pointer;">
@@ -141,6 +146,21 @@ function renderPanel(data) {
   if (isNew) {
     container.insertBefore(panel, container.firstChild);
     console.log("[MindSafe] stats panel inserted into right column");
+  }
+
+  // Color-code the score value if available
+  if (status === "done") {
+    const scoreEl = panel.querySelector(".mindsafe-score-value");
+    if (scoreEl && tenPointScore != null && !Number.isNaN(tenPointScore)) {
+      const s = tenPointScore;
+      let color = "#dc2626"; // default: red
+      if (s >= 8) {
+        color = "#16a34a"; // green
+      } else if (s >= 5) {
+        color = "#f97316"; // orange
+      }
+      scoreEl.style.color = color;
+    }
   }
 
   // Attach click handler to toggle detailed scores
@@ -219,13 +239,33 @@ function requestAndRenderLatestPanel(intervalRef) {
 
   chrome.runtime.sendMessage({ type: "GET_LAST_SCORE" }, (resp) => {
     if (chrome.runtime.lastError) {
-      console.warn(
-        "[MindSafe] GET_LAST_SCORE failed:",
-        chrome.runtime.lastError
-      );
-      renderPanel(null);
+      // Fallback: read the lastScore directly from storage so the
+      // panel still updates even if the service worker wasn't awake.
+      chrome.storage.local.get("lastScore", (data) => {
+        if (chrome.runtime.lastError) {
+          console.warn(
+            "[MindSafe] chrome.storage.local.get(lastScore) also failed:",
+            chrome.runtime.lastError
+          );
+          renderPanel(null);
+        } else {
+          const stored = data && data.lastScore ? data.lastScore : null;
+          renderPanel(stored);
+
+          if (
+            stored &&
+            (stored.status === "done" || stored.status === "error")
+          ) {
+            if (intervalRef && intervalRef.id) {
+              clearInterval(intervalRef.id);
+              intervalRef.id = null;
+            }
+          }
+        }
+      });
       return;
     }
+
     const data = resp && resp.lastScore ? resp.lastScore : null;
     renderPanel(data);
 

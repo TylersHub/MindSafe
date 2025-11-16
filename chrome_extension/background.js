@@ -215,7 +215,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         ok: false,
         error: "Missing videoUrl in NEW_VIDEO message"
       });
-      return true;
+      return;
     }
 
     // Store a pending state immediately so popup / panel can show something
@@ -249,9 +249,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       title
     });
 
-    // Respond quickly; we don't keep sendResponse open for minutes
+    // Respond quickly; we don't keep sendResponse open for minutes,
+    // and we are not doing any async work tied to sendResponse here.
     sendResponse({ ok: true, lastScore: pending });
-    return true;
+    return;
   }
 
   // 2) GET_LAST_SCORE: popup or content script asking for whatever we last stored
@@ -260,7 +261,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
     if (inMemoryLastScore) {
       sendResponse({ lastScore: inMemoryLastScore });
-      return true;
+      // Synchronous response, no async work for this branch.
+      return;
     }
 
     chrome.storage.local.get("lastScore", (data) => {

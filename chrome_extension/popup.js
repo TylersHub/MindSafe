@@ -73,7 +73,7 @@ function renderResult(r) {
   resultDiv.innerHTML = `
     <div style="margin-bottom:6px;">
       <div style="font-size:12px; color:#6b7280;">Overall rating</div>
-      <div class="score">${tenPoint}</div>
+      <div class="score" id="overall-score">${tenPoint}</div>
       <div style="font-size:12px; color:#374151; margin-top:2px;">${r.label || "N/A"}</div>
     </div>
     <hr style="border:none; border-top:1px solid #e5e7eb; margin:6px 0;" />
@@ -86,6 +86,20 @@ function renderResult(r) {
   `;
 
   if (statusPill) statusPill.textContent = "Complete";
+
+  // Color-code the score badge
+  const scoreEl = document.getElementById("overall-score");
+  if (scoreEl && typeof r.tenPointScore === "number") {
+    const s = r.tenPointScore;
+    scoreEl.classList.remove("score-good", "score-ok", "score-warn");
+    if (s >= 8) {
+      scoreEl.classList.add("score-good");
+    } else if (s >= 5) {
+      scoreEl.classList.add("score-ok");
+    } else {
+      scoreEl.classList.add("score-warn");
+    }
+  }
 }
 
 // Ask background for lastScore (with fallback to storage)
@@ -93,7 +107,7 @@ chrome.runtime.sendMessage({ type: "GET_LAST_SCORE" }, (resp) => {
   const resultDiv = document.getElementById("result");
 
   if (chrome.runtime.lastError) {
-    console.warn("Popup: GET_LAST_SCORE failed:", chrome.runtime.lastError);
+    // Background might not be awake yet; fall back silently to storage.
     try {
       chrome.storage.local.get("lastScore", (data) => {
         if (chrome.runtime.lastError) {
