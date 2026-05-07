@@ -12,11 +12,36 @@ import json
 import tempfile
 import shutil
 from pathlib import Path
+
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 
+# Supabase is optional. If the library is not installed, we disable caching
+# but keep the API fully functional so the Chrome extension still works.
+try:
+    from supabase import create_client, Client  # type: ignore
+except ImportError:  # pragma: no cover - optional dependency
+    create_client = None
+    Client = object  # type: ignore
+    print("[WARN] supabase-py not installed; Supabase caching disabled.")
+
 # Load environment variables
 load_dotenv()
+
+# Supabase configuration
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY")
+
+supabase = None  # type: ignore[assignment]
+if SUPABASE_URL and SUPABASE_KEY and create_client is not None:
+    try:
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        print("[API] Supabase client initialised for video_eval caching.")
+    except Exception as exc:  # pragma: no cover - best-effort
+        print(f"[WARN] Failed to initialise Supabase client: {exc}")
+        supabase = None
+else:
+    print("[WARN] Supabase not configured or client library missing. Caching disabled.")
 
 # Add project paths
 PROJECT_ROOT = Path(__file__).parent
@@ -24,7 +49,6 @@ sys.path.insert(0, str(PROJECT_ROOT / "evaluation"))
 sys.path.insert(0, str(PROJECT_ROOT / "video_data_extraction"))
 
 from evaluation.evaluate_video import evaluate_video, save_results
-from evaluation.llm_client import LLMClient
 
 app = Flask(__name__)
 
@@ -46,6 +70,7 @@ def extract_video_data(youtube_url: str, output_dir: Path) -> dict:
     result = process_youtube_video(
         youtube_url,
         str(output_dir),
+        use_chunked_processing=False,  # FAST MODE: avoid visual LLM path
         segment_duration=30.0,
         frames_per_segment=20,
         audio_chunk_duration=60.0,
@@ -54,14 +79,14 @@ def extract_video_data(youtube_url: str, output_dir: Path) -> dict:
     return result
 
 
-def evaluate_extracted_video(output_dir: Path, child_age: float, api_key: str) -> dict:
+def evaluate_extracted_video(output_dir: Path, child_age: float, api_key: str | None) -> dict:
     """
     Evaluate extracted video content.
     
     Args:
         output_dir: Directory containing extracted video data
         child_age: Age of child in years
-        api_key: OpenAI API key
+        api_key: (unused in fast mode; kept for future LLM-enabled mode)
         
     Returns:
         Dictionary with evaluation results
@@ -72,23 +97,131 @@ def evaluate_extracted_video(output_dir: Path, child_age: float, api_key: str) -
         raise FileNotFoundError(f"Video not found: {video_path}")
     
     print(f"[API] Evaluating video for age {child_age}...")
-    
-    # Initialize LLM client
-    llm_client = LLMClient(api_key=api_key)
-    
-    # Run evaluation
+
+    # Run evaluation in FAST MODE (no LLM, no heavy motion analysis)
     results = evaluate_video(
         video_path=str(video_path),
         child_age=child_age,
-        llm_client=llm_client,
-        outputs_dir=str(output_dir)  # Fixed: parameter is outputs_dir not output_dir
+        llm_client=None,
+        outputs_dir=str(output_dir),
+        compute_motion=False,
     )
     
-    # Save results
-    results_path = save_results(results, output_dir)
+    # Save results locally
+    results_path = output_dir / "evaluation_results.json"
+    save_results(results, str(results_path))
     print(f"[API] Results saved to: {results_path}")
     
     return results
+
+
+def get_cached_evaluation(video_url: str) -> dict | None:
+    """
+    Return cached evaluation from Supabase if it exists, else None.
+    Uses table: video_eval, primary key: video_path (text).
+    """
+    if supabase is None:
+        return None
+
+    try:
+        resp = (
+            supabase.table("video_eval")
+            .select("*")
+            .eq("video_path", video_url)
+            .limit(1)
+            .execute()
+        )
+
+        if not resp.data:
+            return None
+
+        row = resp.data[0]
+
+        cached = {
+            "video_path": row.get("video_path"),
+            "child_age": row.get("child_age"),
+            "age_band": row.get("age_band"),
+            "age_band_name": row.get("age_band_name"),
+            "duration_seconds": row.get("duration_seconds"),
+            "duration_minutes": row.get("duration_minutes"),
+            "dev_score": row.get("dev_score"),
+            "dev_interpretation": row.get("dev_interpretation"),
+            "brainrot_index": row.get("brainrot_index"),
+            "brainrot_interpretation": row.get("brainrot_interpretation"),
+            "overall_recommendation": row.get("overall_recommendation"),
+            "dimension_scores": row.get("dimension_scores"),
+            "metrics": row.get("metrics"),
+            "strengths": row.get("strengths"),
+            "concerns": row.get("concerns"),
+            "recommendations": row.get("recommendations"),
+        }
+        print("[API] Cache hit in Supabase for", video_url)
+        return cached
+
+    except Exception as e:
+        print(f"[API] Supabase cache lookup failed: {e}")
+        return None
+
+
+def save_evaluation_to_supabase(video_url: str, child_age: float, results: dict) -> None:
+    """
+    Save / upsert evaluation results into Supabase table `video_eval`.
+    video_path is the primary key.
+    """
+    if supabase is None:
+        return
+
+    try:
+        # Unpack nested structures from evaluation output
+        metadata = results.get("metadata", {}) or {}
+        overall_scores = results.get("overall_scores", {}) or {}
+        interpretations = results.get("interpretations", {}) or {}
+        dimension_scores = results.get("dimension_scores")
+        raw_metrics = results.get("raw_metrics")
+        recs = results.get("recommendations", {}) or {}
+
+        # Build a simple recommendations list (separate from strengths/concerns)
+        recommendations_list: list[str] = []
+        overall_text = interpretations.get("overall")
+        if overall_text:
+            recommendations_list.append(overall_text)
+
+        payload = {
+            # Primary key
+            "video_path": video_url,
+            # Core metadata
+            "child_age": metadata.get("child_age", child_age),
+            "age_band": metadata.get("age_band"),
+            # DB column is age_band_name, we map from age_band_label in metadata
+            "age_band_name": metadata.get("age_band_label"),
+            "duration_seconds": metadata.get("duration_seconds"),
+            "duration_minutes": metadata.get("duration_minutes"),
+            # Overall scores
+            "dev_score": overall_scores.get("development_score"),
+            "dev_interpretation": interpretations.get("developmental"),
+            "brainrot_index": overall_scores.get("brainrot_index"),
+            "brainrot_interpretation": interpretations.get("brainrot"),
+            "overall_recommendation": interpretations.get("overall"),
+            # JSON fields
+            "dimension_scores": dimension_scores,
+            "metrics": raw_metrics,
+            # Recommendation breakdown
+            "strengths": recs.get("strengths"),
+            "concerns": recs.get("concerns"),
+            "recommendations": recommendations_list,
+        }
+
+        (
+            supabase
+            .table("video_eval")
+            .upsert(payload, on_conflict="video_path")
+            .execute()
+        )
+
+        print("[API] Saved evaluation to Supabase for", video_url)
+
+    except Exception as e:
+        print(f"[API] Supabase cache save failed: {e}")
 
 
 @app.route('/health', methods=['GET'])
@@ -125,6 +258,12 @@ def evaluate_get():
         
         # Determine if we should use existing data
         use_existing = not youtube_url  # If no URL provided, use existing data
+
+        # If URL provided, first check Supabase cache
+        if youtube_url:
+            cached = get_cached_evaluation(youtube_url)
+            if cached is not None:
+                return jsonify(cached), 200
             
         if not age_str:
             return jsonify({
@@ -146,13 +285,8 @@ def evaluate_get():
                 "message": "Age must be a number (e.g., 4 or 4.5)"
             }), 400
         
-        # Check API key
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            return jsonify({
-                "error": "API key not configured",
-                "message": "OPENAI_API_KEY environment variable is not set"
-            }), 500
+        # API key is optional in fast mode (LLM disabled by default)
+        api_key = os.getenv("OPENROUTER_API_KEY")
         
         # Determine output directory
         if use_existing:
@@ -179,13 +313,17 @@ def evaluate_get():
             print(f"[API] Starting evaluation for age {child_age}")
             results = evaluate_extracted_video(output_dir, child_age, api_key)
             print(f"[API] Evaluation complete")
+
+            # Step 3: Save results to Supabase cache if URL provided
+            if youtube_url:
+                save_evaluation_to_supabase(youtube_url, child_age, results)
             
             # Return results
             return jsonify(results), 200
             
         finally:
             # Clean up temporary directory (only if we created one)
-            if temp_dir and temp_dir.exists():
+            if not use_existing and temp_dir and temp_dir.exists():
                 shutil.rmtree(temp_dir)
                 print(f"[API] Cleaned up temporary directory: {temp_dir}")
     
@@ -263,11 +401,6 @@ def internal_error(e):
 
 
 if __name__ == '__main__':
-    # Check for API key
-    if not os.getenv("OPENAI_API_KEY"):
-        print("WARNING: OPENAI_API_KEY environment variable is not set!")
-        print("Set it in your .env file or as an environment variable.")
-    
     # Run the Flask app
     print("=" * 70)
     print("  Children's Video Content Evaluator API")
@@ -287,4 +420,3 @@ if __name__ == '__main__':
     print()
     
     app.run(debug=True, host='0.0.0.0', port=5001)
-

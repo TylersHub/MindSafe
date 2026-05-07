@@ -190,6 +190,150 @@ def compute_event_metrics_from_labels(segment_labels: List[SegmentLabels],
     }
 
 
+def compute_event_metrics_heuristic(
+    transcript_segments: List[TranscriptSegment],
+    duration_minutes: float,
+) -> Dict[str, float]:
+    """
+    FAST heuristic semantic metrics (no LLM).
+
+    We scan the full transcript for simple keyword lists to approximate
+    prosocial / aggression / SEL / fantasy / interactivity. This is much
+    faster than LLM labeling while still giving more signal than flat defaults.
+    """
+    if not transcript_segments or duration_minutes <= 0:
+        return {
+            "prosocial_rate": 0.0,
+            "aggression_rate": 0.0,
+            "prosocial_ratio": 0.5,
+            "sel_strategy_rate": 0.0,
+            "direct_address_rate": 0.0,
+            "interactive_block_count": 0,
+            "fantasy_rate": 0.0,
+            "impossible_event_rate": 0.0,
+            "fear_intense_rate": 0.0,
+        }
+
+    full_text = " ".join(seg.text for seg in transcript_segments).lower()
+
+    prosocial_words = [
+        "share",
+        "sharing",
+        "kind",
+        "kindness",
+        "help",
+        "helping",
+        "sorry",
+        "apologize",
+        "apology",
+        "please",
+        "thank you",
+        "friend",
+        "friends",
+        "teamwork",
+        "together",
+        "cooperate",
+        "cooperation",
+    ]
+    aggression_words = [
+        "hit",
+        "hitting",
+        "kick",
+        "kicking",
+        "fight",
+        "fighting",
+        "punch",
+        "angry",
+        "mad",
+        "mean",
+        "yell",
+        "shout",
+    ]
+    sel_words = [
+        "calm down",
+        "deep breath",
+        "breathe",
+        "feelings",
+        "how do you feel",
+        "use your words",
+        "take a break",
+        "count to",
+    ]
+    direct_address_phrases = [
+        "can you",
+        "will you",
+        "let's",
+        "let us",
+        "do you want to",
+        "join us",
+        "come on",
+    ]
+    fantasy_words = [
+        "magic",
+        "fairy",
+        "dragon",
+        "wizard",
+        "superhero",
+        "castle",
+        "princess",
+        "unicorn",
+    ]
+    impossible_words = [
+        "fly",
+        "flying",
+        "invisible",
+        "time travel",
+        "teleport",
+    ]
+    fear_words = [
+        "scary",
+        "afraid",
+        "monster",
+        "ghost",
+        "danger",
+        "creepy",
+    ]
+
+    def count_occurrences(words):
+        return sum(full_text.count(w) for w in words)
+
+    total_prosocial = count_occurrences(prosocial_words)
+    total_aggressive = count_occurrences(aggression_words)
+    total_sel = count_occurrences(sel_words)
+    total_impossible = count_occurrences(impossible_words)
+    total_fantasy_markers = count_occurrences(fantasy_words)
+    total_fear = count_occurrences(fear_words)
+    direct_address_segments = count_occurrences(direct_address_phrases)
+
+    prosocial_rate = total_prosocial / duration_minutes
+    aggression_rate = total_aggressive / duration_minutes
+    sel_strategy_rate = total_sel / duration_minutes
+    impossible_event_rate = total_impossible / duration_minutes
+    fantasy_rate = total_fantasy_markers / duration_minutes
+    fear_intense_rate = total_fear / duration_minutes
+    direct_address_rate = direct_address_segments / duration_minutes
+
+    total_social_events = total_prosocial + total_aggressive
+    if total_social_events > 0:
+        prosocial_ratio = total_prosocial / total_social_events
+    else:
+        prosocial_ratio = 0.5
+
+    interactive_block_count = direct_address_segments
+
+    return {
+        "prosocial_rate": float(prosocial_rate),
+        "aggression_rate": float(aggression_rate),
+        "prosocial_ratio": float(prosocial_ratio),
+        "sel_strategy_rate": float(sel_strategy_rate),
+        "direct_address_rate": float(direct_address_rate),
+        "interactive_block_count": int(interactive_block_count),
+        "fantasy_rate": float(fantasy_rate),
+        "impossible_event_rate": float(impossible_event_rate),
+        "fear_intense_rate": float(fear_intense_rate),
+    }
+
+
 def compute_narrative_metrics_embeddings(transcript_segments: List[TranscriptSegment],
                                         chunk_duration: float = 30.0) -> Dict[str, float]:
     """

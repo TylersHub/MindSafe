@@ -224,7 +224,7 @@ def main():
     )
     parser.add_argument(
         "--api-key",
-        help="OpenAI API key (or set OPENAI_API_KEY env var)"
+        help="OpenRouter API key (or set OPENROUTER_API_KEY env var)"
     )
     parser.add_argument(
         "--comparison-report",
@@ -240,9 +240,9 @@ def main():
         sys.exit(1)
     
     # Get API key
-    api_key = args.api_key or os.getenv("OPENAI_API_KEY")
+    api_key = args.api_key or os.getenv("OPENROUTER_API_KEY")
     if not api_key:
-        print("Error: OpenAI API key required. Set OPENAI_API_KEY env var or use --api-key")
+        print("Error: OpenRouter API key required. Set OPENROUTER_API_KEY env var or use --api-key")
         sys.exit(1)
     
     # Run batch evaluation

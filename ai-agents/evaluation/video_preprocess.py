@@ -125,46 +125,56 @@ def get_video_fps(video_path: str) -> float:
 
 def detect_shots(video_path: str, threshold: float = 0.3) -> List[Shot]:
     """
-    Detect shot boundaries using ffmpeg scene detection.
-    Alternative: could use PySceneDetect library for more sophisticated detection.
-    
+    FAST-MODE shot estimation.
+
+    For speed, we avoid heavy scene detection (PySceneDetect or ffmpeg
+    scene filters) and instead approximate shots by splitting the video
+    into uniform time intervals.
+
     Args:
         video_path: Path to video file
-        threshold: Scene detection threshold (0-1, lower = more sensitive)
-        
+        threshold: Unused in fast mode (kept for API compatibility)
+
     Returns:
         List of Shot objects
     """
-    try:
-        # Try to use PySceneDetect if available
-        from scenedetect import detect, ContentDetector, split_video_ffmpeg
-        
-        # Detect scenes
-        scene_list = detect(video_path, ContentDetector(threshold=threshold * 30))
-        
-        fps = get_video_fps(video_path)
-        shots = []
-        
-        for i, scene in enumerate(scene_list):
-            start_frame = scene[0].get_frames()
-            end_frame = scene[1].get_frames()
-            start_time = scene[0].get_seconds()
-            end_time = scene[1].get_seconds()
-            
-            shots.append(Shot(
+    duration = get_video_duration(video_path)
+    fps = get_video_fps(video_path)
+
+    if duration <= 0:
+        # Fallback: single shot with default 30fps
+        fps = fps or 30.0
+        return [
+            Shot(
+                start_time=0.0,
+                end_time=0.0,
+                duration=0.0,
+                frame_start=0,
+                frame_end=0,
+            )
+        ]
+
+    # Choose a coarse shot length to keep pacing reasonable but fast
+    approx_shot_len = 5.0  # seconds
+    num_shots = max(1, int(duration / approx_shot_len))
+
+    shots: List[Shot] = []
+    for i in range(num_shots):
+        start_time = i * approx_shot_len
+        end_time = min(duration, (i + 1) * approx_shot_len)
+        frame_start = int(start_time * fps)
+        frame_end = int(end_time * fps)
+        shots.append(
+            Shot(
                 start_time=start_time,
                 end_time=end_time,
                 duration=end_time - start_time,
-                frame_start=start_frame,
-                frame_end=end_frame
-            ))
-        
-        return shots
-    
-    except ImportError:
-        # Fallback: Use ffmpeg's scene detection
-        print("PySceneDetect not available, using ffmpeg scene detection...")
-        return detect_shots_ffmpeg(video_path, threshold)
+                frame_start=frame_start,
+                frame_end=frame_end,
+            )
+        )
+
+    return shots
 
 
 def detect_shots_ffmpeg(video_path: str, threshold: float = 0.3) -> List[Shot]:
@@ -246,81 +256,27 @@ def detect_shots_ffmpeg(video_path: str, threshold: float = 0.3) -> List[Shot]:
         )]
 
 
-def transcribe_audio(audio_path: str, use_api: bool = True) -> List[TranscriptSegment]:
+def transcribe_audio(audio_path: str, use_api: bool = False) -> List[TranscriptSegment]:
     """
-    Transcribe audio file using OpenAI Whisper API or local Whisper.
-    
+    Transcribe audio file using the local Whisper model.
+
+    Remote OpenAI transcription has been removed; all transcription now happens
+    locally to avoid external dependencies.
+
     Args:
         audio_path: Path to audio file
-        use_api: If True, use OpenAI API; if False, use local whisper
-        
+        use_api: Ignored (kept for backward compatibility)
+
     Returns:
         List of TranscriptSegment objects
     """
-    if use_api:
-        return transcribe_audio_api(audio_path)
-    else:
-        return transcribe_audio_local(audio_path)
-
-
-def transcribe_audio_api(audio_path: str) -> List[TranscriptSegment]:
-    """
-    Transcribe using OpenAI Whisper API.
-    
-    Args:
-        audio_path: Path to audio file
-        
-    Returns:
-        List of TranscriptSegment objects
-    """
-    import openai
-    
-    # Detect OpenAI version
-    try:
-        from openai import OpenAI
-        use_new_api = True
-    except ImportError:
-        use_new_api = False
-    
-    try:
-        with open(audio_path, "rb") as audio_file:
-            if use_new_api:
-                # New API (openai >= 1.0.0)
-                client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-                response = client.audio.transcriptions.create(
-                    model="whisper-1",
-                    file=audio_file
-                )
-                text = response.text
-            else:
-                # Old API (openai < 1.0.0)
-                openai.api_key = os.getenv("OPENAI_API_KEY")
-                response = openai.Audio.transcribe(
-                    model="whisper-1",
-                    file=audio_file
-                )
-                text = response.get('text', '') if isinstance(response, dict) else response.text
-        
-        # Create single segment with full text
-        segments = []
-        if text:
-            segments.append(TranscriptSegment(
-                start=0.0,
-                end=0.0,
-                text=text.strip()
-            ))
-        
-        return segments
-    
-    except Exception as e:
-        print(f"Error transcribing with API: {e}")
-        return []
+    return transcribe_audio_local(audio_path)
 
 
 def transcribe_audio_local(audio_path: str) -> List[TranscriptSegment]:
     """
     Transcribe using local Whisper model.
-    Requires: pip install openai-whisper
+    Requires: a locally installed Whisper implementation (e.g. `pip install openai-whisper`)
     
     Args:
         audio_path: Path to audio file
@@ -333,9 +289,9 @@ def transcribe_audio_local(audio_path: str) -> List[TranscriptSegment]:
         
         # Load model (use 'base' for speed, 'large' for accuracy)
         model = whisper.load_model("base")
-        
-        # Transcribe with timestamps
-        result = model.transcribe(audio_path, word_timestamps=False)
+
+        # Transcribe with timestamps; disable fp16 on CPU to avoid warnings
+        result = model.transcribe(audio_path, word_timestamps=False, fp16=False)
         
         # Extract segments
         segments = []
@@ -349,7 +305,7 @@ def transcribe_audio_local(audio_path: str) -> List[TranscriptSegment]:
         return segments
     
     except ImportError:
-        print("Local whisper not installed. Install with: pip install openai-whisper")
+        print("Local whisper not installed. Install with: `pip install openai-whisper`")
         return []
     except Exception as e:
         print(f"Error transcribing locally: {e}")

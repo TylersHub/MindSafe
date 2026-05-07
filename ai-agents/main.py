@@ -18,7 +18,6 @@ sys.path.insert(0, str(PROJECT_ROOT / "evaluation"))
 sys.path.insert(0, str(PROJECT_ROOT / "video_data_extraction"))
 
 from evaluation.evaluate_video import evaluate_video, save_results, print_summary
-from evaluation.llm_client import LLMClient
 
 
 def extract_video_data(youtube_url: str, output_dir: Path) -> dict:
@@ -42,7 +41,7 @@ def extract_video_data(youtube_url: str, output_dir: Path) -> dict:
     result = process_youtube_video(
         youtube_url,
         output_dir=str(output_dir),
-        use_chunked_processing=True,
+        use_chunked_processing=False,  # FAST MODE: skip visual/LLM analysis
         segment_duration=30.0,
         frames_per_segment=20,
         audio_chunk_duration=60.0,
@@ -62,8 +61,9 @@ def evaluate_extracted_video(output_dir: Path, child_age: float, api_key: str) -
     Args:
         output_dir: Directory containing extracted data
         child_age: Age of child in years
-        api_key: OpenAI API key
-        
+
+        api_key: OpenRouter API key
+
     Returns:
         Evaluation results dictionary
     """
@@ -77,13 +77,7 @@ def evaluate_extracted_video(output_dir: Path, child_age: float, api_key: str) -
     if not video_path.exists():
         raise FileNotFoundError(f"Video not found: {video_path}")
     
-    # Initialize LLM client
-    print("🔧 Initializing LLM client...")
-    llm_client = LLMClient(api_key=api_key)
-    print("✅ LLM client initialized")
-    print()
-    
-    # Run evaluation
+    # Run evaluation (FAST MODE - no LLM client needed)
     print("🚀 Starting evaluation...")
     print(f"👶 Child age: {child_age} years")
     print()
@@ -91,9 +85,9 @@ def evaluate_extracted_video(output_dir: Path, child_age: float, api_key: str) -
     results = evaluate_video(
         video_path=str(video_path),
         child_age=child_age,
-        llm_client=llm_client,
+        llm_client=None,
         outputs_dir=str(output_dir),
-        compute_motion=True  # Use real motion analysis
+        compute_motion=False  # Skip heavy motion analysis for speed
     )
     
     # Save results
@@ -199,15 +193,8 @@ Examples:
         if response.lower() != 'y':
             sys.exit(0)
     
-    # Check API key
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        print("\n❌ Error: OPENAI_API_KEY not found")
-        print()
-        print("Please set your OpenAI API key:")
-        print("  1. Make sure .env file exists with: OPENAI_API_KEY=sk-...")
-        print("  2. Or set environment variable: export OPENAI_API_KEY='sk-...'")
-        sys.exit(1)
+    # API key is optional in fast mode (LLM disabled by default)
+    api_key = os.getenv("OPENROUTER_API_KEY")
     
     # Setup output directory
     output_dir = PROJECT_ROOT / args.output

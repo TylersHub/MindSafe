@@ -6,6 +6,7 @@ Analyzes video cuts, motion, loudness, music, and sound effects.
 import numpy as np
 import subprocess
 import json
+import warnings
 from typing import List, Dict, Optional
 from .video_preprocess import Shot
 
@@ -148,9 +149,12 @@ def compute_audio_metrics(audio_path: str, duration_sec: Optional[float] = None)
     try:
         import librosa
         import librosa.feature
-        
-        # Load audio
-        y, sr = librosa.load(audio_path, sr=16000, mono=True)
+
+        # Suppress noisy backend warnings from librosa/audioread for speed runs
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            # Load audio
+            y, sr = librosa.load(audio_path, sr=16000, mono=True)
         
         if duration_sec is None:
             duration_sec = len(y) / sr
@@ -238,9 +242,9 @@ def compute_pacing_audio_features(video_path: str, audio_path: str,
     # Compute pacing metrics
     pacing = compute_pacing_metrics(shots, duration_sec)
     
-    # Compute motion metrics (can be slow, optional)
-    # Set compute_motion=False to skip for faster processing
-    compute_motion = True
+    # Compute motion metrics (can be slow). For speed, we skip motion analysis
+    # by default and use neutral defaults.
+    compute_motion = False
     if compute_motion:
         motion = compute_motion_metrics(video_path, shots, sample_fps=1)
     else:

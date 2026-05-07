@@ -1,11 +1,9 @@
-/* A simple animation for the elements to gently float */
 @keyframes float {
     0% { transform: translateY(0px); }
     50% { transform: translateY(-12px); }
     100% { transform: translateY(0px); }
 }
 
-/* A separate animation for the swing */
 @keyframes swing {
     0% { transform: rotate(-5deg); }
     50% { transform: rotate(5deg); }
@@ -27,7 +25,7 @@
 body {
     overflow: hidden;
     position: relative;
-    background-image: url('../img/form-background.jpg');
+    background-image: url('../img/toys.jpg');
     background-repeat: no-repeat;
     background-size: cover;
 }

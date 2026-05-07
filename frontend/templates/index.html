@@ -5,11 +5,11 @@
     <meta charset="utf-8" />
     <title>MindSafe</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="/static/css/styles.css" />
+    <link rel="stylesheet" href="../static/css/styles.css" />
 </head>
 
 <body>
-    <!-- ====== NAVBAR ====== -->
+    <!-- Navbar -->
     <header class="nav">
         <div class="nav__inner container">
             <div class="nav__brand">
@@ -29,14 +29,12 @@
             </nav>
 
             <div class="nav__cta">
-                <!-- <a href="#demo" class="btn btn--ghost">Log In</a> -->
-                <!-- Let Flask handle /form route -->
-                <a href="/templates/form.html" class="btn btn--primary">Try MindSafe</a>
+                <a href="{{ url_for('form') }}" class="btn btn--primary">Try MindSafe</a>
             </div>
         </div>
     </header>
 
-    <!-- ====== HERO ====== -->
+    <!-- Hero Section -->
     <main>
         <section class="hero">
             <div class="hero__inner container">
@@ -68,10 +66,8 @@
                     </div>
                 </div>
 
-                <!-- Right column -->
                 <div class="hero__media">
                     <div class="hero__media-inner">
-                        <!-- Brain / video placeholder -->
                         <div class="hero__brain">
                             <img class="hero__brain-image" src="/static/img/young-boy-watching-tablet.jpg"
                                 alt="3D Brain Simulation" />

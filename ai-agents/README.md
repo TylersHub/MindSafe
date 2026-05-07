@@ -23,10 +23,11 @@ python main.py --url "https://youtube.com/watch?v=VIDEO_ID" --age 4
 python api.py
 
 # 2. Call the API endpoint
-curl "http://localhost:5000/evaluate?url=YOUTUBE_URL&age=4"
+curl "http://localhost:5001/evaluate?url=YOUTUBE_URL&age=4"
 ```
 
 **That's it!** The system will:
+
 - ✅ Download the video from YouTube
 - ✅ Extract and transcribe audio
 - ✅ Analyze video content with AI
@@ -40,6 +41,7 @@ curl "http://localhost:5000/evaluate?url=YOUTUBE_URL&age=4"
 ### Two Main Scores
 
 1. **Development Score (0-100)**
+
    - Measures positive developmental value
    - Based on age-appropriate content
    - Higher is better
@@ -74,11 +76,13 @@ outputs/
 ## 📖 Usage Examples
 
 ### Basic Evaluation
+
 ```bash
 python main.py --url "https://youtube.com/watch?v=dQw4w9WgXcQ" --age 4
 ```
 
 ### Different Age Groups
+
 ```bash
 # For a 3-year-old
 python main.py --url "YOUTUBE_URL" --age 3
@@ -88,11 +92,13 @@ python main.py --url "YOUTUBE_URL" --age 6
 ```
 
 ### Custom Output Directory
+
 ```bash
 python main.py --url "YOUTUBE_URL" --age 4 --output my_analysis
 ```
 
 ### Re-evaluate Existing Data
+
 ```bash
 # Skip download/extraction, just re-evaluate
 python main.py --url "YOUTUBE_URL" --age 5 --skip-extraction
@@ -100,16 +106,17 @@ python main.py --url "YOUTUBE_URL" --age 5 --skip-extraction
 
 ## 🎯 Command-Line Arguments
 
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `--url` | ✅ Yes | YouTube video URL |
-| `--age` | ✅ Yes | Child's age in years (e.g., 4, 5.5) |
-| `--output` | ⚪ No | Output directory (default: `outputs`) |
-| `--skip-extraction` | ⚪ No | Skip download, use existing data |
+| Argument            | Required | Description                           |
+| ------------------- | -------- | ------------------------------------- |
+| `--url`             | ✅ Yes   | YouTube video URL                     |
+| `--age`             | ✅ Yes   | Child's age in years (e.g., 4, 5.5)   |
+| `--output`          | ⚪ No    | Output directory (default: `outputs`) |
+| `--skip-extraction` | ⚪ No    | Skip download, use existing data      |
 
 ## 💻 Installation
 
 ### Prerequisites
+
 - Python 3.8+ (works with 3.14!)
 - FFmpeg
 - OpenAI API key
@@ -132,16 +139,16 @@ brew install ffmpeg  # macOS
 # or
 sudo apt-get install ffmpeg  # Ubuntu
 
-# 5. Set up API key
-echo "OPENAI_API_KEY=sk-your-key-here" > .env
+# 5. Set up API key (OpenRouter / Gemini)
+echo "OPENROUTER_API_KEY=your-openrouter-api-key-here" > .env
 ```
 
 ## 📊 Sample Output
 
 ```
 ======================================================================
-              CHILDREN'S VIDEO CONTENT EVALUATOR              
-        Complete Pipeline: Download → Extract → Evaluate        
+              CHILDREN'S VIDEO CONTENT EVALUATOR
+        Complete Pipeline: Download → Extract → Evaluate
 ======================================================================
 
 📺 YouTube URL: https://youtube.com/watch?v=...
@@ -149,7 +156,7 @@ echo "OPENAI_API_KEY=sk-your-key-here" > .env
 📁 Output Directory: outputs
 
 ======================================================================
-                    STEP 1: VIDEO DATA EXTRACTION                    
+                    STEP 1: VIDEO DATA EXTRACTION
 ======================================================================
 
 Step 1/6: Downloading YouTube video...
@@ -169,7 +176,7 @@ Step 6/6: Generating scene summary...
 ⏱️  Processing time: 180.5 seconds
 
 ======================================================================
-                      STEP 2: CONTENT EVALUATION                      
+                      STEP 2: CONTENT EVALUATION
 ======================================================================
 
 🔧 Initializing LLM client...
@@ -186,16 +193,16 @@ Step 1: Preprocessing video...
 Step 2: Computing pacing and audio metrics...
   Cuts per minute: 8.3
   Motion: 2.34 (measured with OpenCV)
-  
+
 Step 3: Computing text metrics...
   Vocabulary diversity: 0.40
-  
+
 Step 4: Computing semantic metrics (LLM)...
   Prosocial content: 40%
-  
+
 Step 5: Computing narrative coherence...
   Story coherence: 87% (embeddings)
-  
+
 Step 6: Computing scores...
 
   DEVELOPMENTAL SCORE: 66.8/100
@@ -263,11 +270,11 @@ STRENGTHS
 
 ## ⏱️ Processing Time & Cost
 
-| Video Length | Processing Time | API Cost |
-|--------------|-----------------|----------|
-| 5 minutes | ~3-5 minutes | ~$0.10-0.20 |
-| 15 minutes | ~8-15 minutes | ~$0.30-0.50 |
-| 30 minutes | ~15-30 minutes | ~$0.50-1.00 |
+| Video Length | Processing Time | API Cost    |
+| ------------ | --------------- | ----------- |
+| 5 minutes    | ~3-5 minutes    | ~$0.10-0.20 |
+| 15 minutes   | ~8-15 minutes   | ~$0.30-0.50 |
+| 30 minutes   | ~15-30 minutes  | ~$0.50-1.00 |
 
 **Tip**: Use `--skip-extraction` for faster re-evaluation with different ages!
 
@@ -276,22 +283,27 @@ STRENGTHS
 ### Pipeline Steps
 
 1. **Video Download** (yt-dlp)
+
    - Downloads video from YouTube
    - Handles quality selection
 
 2. **Audio Extraction** (FFmpeg)
+
    - Separates audio track
    - Prepares for transcription
 
 3. **Speech Transcription** (OpenAI Whisper)
+
    - Converts speech to text
    - Chunked processing for long videos
 
 4. **Visual Analysis** (GPT-4 Vision)
+
    - Analyzes video frames
    - Describes visual content
 
 5. **Content Evaluation** (Custom System)
+
    - Scene detection (PySceneDetect)
    - Motion analysis (OpenCV)
    - Text analysis (NLP)
@@ -347,18 +359,21 @@ HackNYU/
 ## 🔧 System Requirements
 
 ### Required
+
 - ✅ Python 3.8+ (tested on 3.14)
 - ✅ FFmpeg
 - ✅ OpenAI API key
 - ✅ NumPy
 
 ### Installed & Working
+
 - ✅ PySceneDetect (advanced scene detection)
 - ✅ OpenCV (motion analysis)
 - ✅ Sentence-transformers (narrative coherence)
 - ✅ PyTorch (ML backend)
 
 ### Optional
+
 - ⚪ Librosa (detailed audio - not compatible with Python 3.14)
 
 **Note**: System works at 95% capacity without librosa!
@@ -368,14 +383,17 @@ HackNYU/
 The system uses 4 age bands with different thresholds:
 
 - **0-2 years**: Infant/Toddler
+
   - Very conservative limits
   - Emphasis on sensory regulation
 
 - **2-3 years**: Early Preschool
+
   - Simple content focus
   - High interactivity preferred
 
 - **3-5 years**: Preschool
+
   - Balanced evaluation
   - Story coherence matters
 
@@ -385,16 +403,18 @@ The system uses 4 age bands with different thresholds:
 
 ## 🐛 Troubleshooting
 
-### API Key Issues
+### API Key Issues (OpenRouter)
+
 ```bash
 # Check if .env exists
 cat .env
 
 # If not, create it
-echo "OPENAI_API_KEY=sk-your-key-here" > .env
+echo "OPENROUTER_API_KEY=your-openrouter-api-key-here" > .env
 ```
 
 ### FFmpeg Not Found
+
 ```bash
 # macOS
 brew install ffmpeg
@@ -407,6 +427,7 @@ ffmpeg -version
 ```
 
 ### Module Not Found
+
 ```bash
 # Make sure you're in venv
 source venv/bin/activate
@@ -416,6 +437,7 @@ pip install -r requirements.txt
 ```
 
 ### Video Download Fails
+
 - Check internet connection
 - Verify YouTube URL is correct
 - Try a different video
@@ -424,6 +446,7 @@ pip install -r requirements.txt
 ## 🎓 Research Background
 
 This system is based on research in:
+
 - **American Academy of Pediatrics (AAP)**: Screen time guidelines
 - **CASEL Framework**: Social-emotional learning
 - **Piaget's Theory**: Cognitive development stages
@@ -433,6 +456,7 @@ This system is based on research in:
 ## 🤝 Contributing
 
 Contributions welcome! Areas for improvement:
+
 - Additional metrics
 - More age bands
 - Multi-language support
@@ -464,5 +488,4 @@ python main.py --url "YOUR_YOUTUBE_URL" --age 4
 
 **Made with ❤️ for protecting children's development**
 
-*HackNYU 2025*
-
+_HackNYU 2025_

@@ -3,7 +3,9 @@
 ## ✅ What Was Created
 
 ### 1. **`api.py`** - Main API Server
+
 A complete Flask REST API with:
+
 - **GET `/health`** - Health check endpoint
 - **GET `/evaluate`** - Video evaluation endpoint (fully functional)
   - Query params: `url` (YouTube URL), `age` (child's age)
@@ -14,7 +16,9 @@ A complete Flask REST API with:
 - Temporary file cleanup
 
 ### 2. **`API_README.md`** - Complete API Documentation
+
 Comprehensive guide covering:
+
 - Quick start instructions
 - All endpoint specifications
 - Request/response examples
@@ -26,7 +30,9 @@ Comprehensive guide covering:
 - Troubleshooting
 
 ### 3. **`test_api.py`** - Automated Test Suite
+
 Interactive testing script that validates:
+
 - Health check endpoint
 - Error handling (missing params, invalid ages, etc.)
 - Full video evaluation workflow
@@ -34,13 +40,16 @@ Interactive testing script that validates:
 - Saves results to `api_test_results.json`
 
 ### 4. **`RUN_API.md`** - Quick Start Guide
+
 Simple 3-step guide to:
+
 - Start the API server
 - Test basic endpoints
 - Run automated tests
 - Quick reference table
 
 ### 5. **Updated Files**
+
 - **`requirements.txt`** - Added `flask>=3.0.0`
 - **`README.md`** - Added API option to Quick Start, updated project structure
 
@@ -49,10 +58,13 @@ Simple 3-step guide to:
 ## 🔌 API Endpoints
 
 ### GET `/health`
+
 ```bash
-curl http://localhost:5000/health
+curl http://localhost:5001/health
 ```
+
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -62,10 +74,13 @@ curl http://localhost:5000/health
 ```
 
 ### GET `/evaluate?url=YOUTUBE_URL&age=AGE`
+
 ```bash
-curl "http://localhost:5000/evaluate?url=https://youtube.com/watch?v=VIDEO_ID&age=4"
+curl "http://localhost:5001/evaluate?url=https://youtube.com/watch?v=VIDEO_ID&age=4"
 ```
+
 **Response:** Complete evaluation JSON with:
+
 - `dev_score` - Developmental score (0-100)
 - `brainrot_index` - Brainrot index (0-100)
 - `dimension_scores` - 6 dimension scores
@@ -75,46 +90,53 @@ curl "http://localhost:5000/evaluate?url=https://youtube.com/watch?v=VIDEO_ID&ag
 - `recommendations` - Age-appropriate suggestions
 
 ### POST `/evaluate`
+
 ```bash
-curl -X POST http://localhost:5000/evaluate
+curl -X POST http://localhost:5001/evaluate
 ```
+
 **Response:**
+
 ```json
 {
   "error": "Not implemented",
   "message": "POST endpoint is not yet implemented. Please use GET /evaluate for now."
 }
 ```
-*Ready for future implementation - just add the logic!*
+
+_Ready for future implementation - just add the logic!_
 
 ---
 
 ## 🚀 How to Use
 
 ### Start the API
+
 ```bash
 source venv/bin/activate
 python api.py
 ```
 
 ### Call the API
+
 ```bash
 # From command line
-curl "http://localhost:5000/evaluate?url=YOUTUBE_URL&age=4"
+curl "http://localhost:5001/evaluate?url=YOUTUBE_URL&age=4"
 
 # From Python
 import requests
-response = requests.get('http://localhost:5000/evaluate', 
+response = requests.get('http://localhost:5001/evaluate',
                        params={'url': 'YOUTUBE_URL', 'age': 4})
 results = response.json()
 
 # From JavaScript
-fetch('http://localhost:5000/evaluate?url=YOUTUBE_URL&age=4')
+fetch('http://localhost:5001/evaluate?url=YOUTUBE_URL&age=4')
   .then(r => r.json())
   .then(data => console.log(data));
 ```
 
 ### Test the API
+
 ```bash
 python test_api.py
 ```
@@ -158,9 +180,7 @@ python test_api.py
     "Story: Excellent (100/100)",
     "Fantasy: Excellent (100/100)"
   ],
-  "concerns": [
-    "Interactivity: Needs improvement (0/100)"
-  ],
+  "concerns": ["Interactivity: Needs improvement (0/100)"],
   "recommendations": [
     "Consider content with more direct viewer engagement",
     "Excellent narrative structure for this age group"
@@ -173,6 +193,7 @@ python test_api.py
 ## 🔧 Technical Details
 
 ### Architecture
+
 - **Framework:** Flask 3.1.2
 - **Processing:** Synchronous (API waits for evaluation to complete)
 - **Cleanup:** Automatic temporary file cleanup
@@ -180,11 +201,13 @@ python test_api.py
 - **Validation:** Request parameter validation and sanitization
 
 ### Response Time
+
 - Short videos (< 1 min): ~1-2 minutes
 - Medium videos (5 min): ~3-5 minutes
 - Long videos (15 min): ~8-15 minutes
 
 ### Status Codes
+
 - `200` - Success
 - `400` - Bad Request (invalid parameters)
 - `404` - Not Found
@@ -215,6 +238,7 @@ HackNYU/
 The POST endpoint is a placeholder ready for implementation. Potential uses:
 
 ### Option 1: JSON Body Request
+
 ```python
 @app.route('/evaluate', methods=['POST'])
 def evaluate_post():
@@ -222,31 +246,33 @@ def evaluate_post():
     youtube_url = data.get('url')
     child_age = data.get('age')
     options = data.get('options', {})
-    
+
     # Process with options
     results = evaluate_video(...)
     return jsonify(results)
 ```
 
 ### Option 2: File Upload
+
 ```python
 @app.route('/evaluate', methods=['POST'])
 def evaluate_post():
     video_file = request.files['video']
     child_age = request.form.get('age')
-    
+
     # Save and process uploaded file
     results = evaluate_video(...)
     return jsonify(results)
 ```
 
 ### Option 3: Async Processing
+
 ```python
 @app.route('/evaluate', methods=['POST'])
 def evaluate_post():
     # Start background task
     task_id = start_evaluation_task(...)
-    
+
     # Return task ID immediately
     return jsonify({
         'task_id': task_id,
@@ -260,6 +286,7 @@ def evaluate_post():
 ## ✅ Installation Verification
 
 Flask is already installed! Verify with:
+
 ```bash
 source venv/bin/activate
 python -c "import flask; print(f'Flask {flask.__version__} installed')"
@@ -272,12 +299,14 @@ Expected output: `Flask 3.1.2 installed`
 ## 🎉 Ready to Use!
 
 Your API is complete and ready for:
+
 - ✅ Local development
 - ✅ Testing and demos
 - ✅ Integration with frontend applications
 - ✅ Production deployment (with minor modifications)
 
 ### Next Steps:
+
 1. **Start the API:** `python api.py`
 2. **Test it:** `python test_api.py`
 3. **Read the docs:** See `API_README.md`
@@ -287,5 +316,4 @@ Your API is complete and ready for:
 
 **Made with ❤️ for protecting children's development**
 
-*HackNYU 2025*
-
+_HackNYU 2025_

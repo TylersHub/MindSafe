@@ -27,8 +27,10 @@ def download_youtube_video(url: str, out_dir: Path) -> Path:
         "merge_output_format": "mp4",
         "quiet": True,
         "noprogress": True,
-        # Use browser cookies to bypass bot detection
-        "cookiesfrombrowser": ("chrome",),  # Change to "firefox" or "safari" if Chrome doesn't work
+        # Use browser cookies to bypass bot detection (optional)
+        # "cookiesfrombrowser": ("chrome",),  # Change to "firefox" or "safari" if Chrome doesn't work
+        # Avoid JS runtime deprecation warning by forcing a simple player client
+        "extractor_args": {"youtube": {"player_client": ["default"]}},
     }
 
     before_files = set(out_dir.glob("*"))
